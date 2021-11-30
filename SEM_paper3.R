@@ -11,7 +11,7 @@ library(bestNormalize)
 library(corrplot)
 library(corrr)
 library(Hmisc)
-##hola##
+##hola##test for server
 
 ##Import database
 db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/database_short.xlsx")

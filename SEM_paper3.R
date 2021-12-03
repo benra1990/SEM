@@ -7,18 +7,19 @@
 
 ##Libraries##
 
-install.packages(c("lavaan","semPlot","corrplot","bestNormalize" ))
+install.packages(c("lavaan","semPlot","corrplot" ))
 library(lavaan)
 library(semPlot)
 library(corrplot)
 library(openxlsx)
 library(data.table)
+install.packages("bestNormalize")
 library(bestNormalize)
 library(corrplot)
 library(corrr)
 library(Hmisc)
+library(dplyr)
 
-#hola#
 
 ##Import database
 db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/database_short.xlsx")# this will change depending on where you have it on your computers!
@@ -31,17 +32,16 @@ data.table(colnames(db_short))#get order of columns in the dataframe
 
 #Generating subset of variables to be used and new working dataframe named"db"
 
-ha<-db_short[c(40:43,44:46,54)]##human agency
-tot_sup<- dplyr::select(db_short, starts_with("tot"))##variables of total supply (all supply within the limits of each municipality)
-product<-dplyr::select(db_short, starts_with("productivity"))##productivity or yield variables (mean yield per ha)
-ginis<-dplyr::select(db_short, starts_with("gini"))##Gini coefficients of ES supply variables
-income<-db_short[c(55,57)]##mean income & gini income
-area<-db_short[,52]##mean area  of all the properties within a municipality
+ha<-db_short[c("P_RUR", "P_INDIG", "prof_ed_univ")]##human agency
+tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]##variables of total supply (all supply within the limits of each municipality)
+product<-db_short[c("productivity_water_sup","productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber", "productivity_recreation")]##productivity or yield variables (mean yield per ha)
+ginis<-db_short[c("gini_water_sup_prod", "gini_water_sup_tot","gini_water_reg_prod","gini_water_reg_tot","gini_cseq_prod","gini_cseq_tot","gini_cstor_prod","gini_cstor_tot","gini_erosion_prod","gini_erosion_tot","gini_timber_prod","gini_timber_tot","gini_recreation_prod", "gini_recreation_tot")]##Gini coefficients of ES supply variables
+income<-db_short[c("weighted_mean_income","weighted_gini_income")]##mean income & gini income
+area<-db_short[,"area_promedio_predios"]##mean area  of all the properties within a municipality
 data.table(colnames(db_short))#check order of columns
 
-db<-data.frame(ha,income,area, product,tot_sup,ginis)#leaving out tot.sup for the moment
-db<-db[-c(16,19,25,28:29,40:41,48)]#eliminating ginis for total supply and nntp variables
-colnames(db)[c(1:6,8:9,41)]<-c("pov_persons", "pov_percentage","rur", "indig", "forest_area","educa","dist_cities","inc", "gini_income")
+db<-data.frame(ha,income,area, product,tot_sup,ginis)#
+colnames(db)[c(1:5)]<-c("rur", "indig","educa","inc", "gini_income")
 data.table(colnames(db))
 
 sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
@@ -56,9 +56,9 @@ for (i in 1:length(db))  { ##transform all variables to numeric
 
 #Histograms for all variables
 windows()
-par(mfrow= c (5,8),mar=c(1,2,2,0.5))     
-for (i in 1:39) {
-  hist(db[,c(1:40)][,i],main=names(db [,c(1:40)])[i],xlab=names(db[,c(1:40)])[i])
+par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
+for (i in 1:34) {
+  hist(db[,c(1:34)][,i],main=names(db [,c(1:34)])[i],xlab=names(db[,c(1:34)])[i])
 }
 dev.off()
 #check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
@@ -85,7 +85,6 @@ bestNormalize(db$pov_persons)
 bestNormalize(db$pov_percentage)
 bestNormalize(db$rur)
 bestNormalize(db$indig)
-#bestNormalize(db$forest_area)
 bestNormalize(db$educa)
 bestNormalize(db$tot_pop)
 bestNormalize(db$dist_cities)
@@ -124,19 +123,19 @@ db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(producti
                         
 )->dbn#new data base with normalized variables is "dbn"
 
-dbn<-lapply(db[,c(1:41)], scales::rescale)#rescaling data 0 to 1
+dbn<-lapply(db[,c(1:34)], scales::rescale)#rescaling data 0 to 1
 dbn<-as.data.frame(dbn)# transforming to dataframe again
 
 #new histogram
 
-par(mfrow= c (5,8),mar=c(1,2,2,0.5))     
-for (i in 1:40) {
-  hist(dbn[,c(1:40)][,i],main=names(dbn [,c(1:40)])[i],xlab=names(dbn [,c(1:40)])[i])
+par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
+for (i in 1:34) {
+  hist(dbn[,c(1:34)][,i],main=names(dbn [,c(1:34)])[i],xlab=names(dbn [,c(1:34)])[i])
 }
  
 #check correlations between measurable variables of human agency
-cor_datos<-cor(db[,2:8], use="pairwise.complete.obs", method="spearman")
-cor_matrix<-rcorr(as.matrix(db[,2:8]))
+cor_datos<-cor(db[,1:3], use="pairwise.complete.obs", method="spearman")
+cor_matrix<-rcorr(as.matrix(db[,1:3]))
 
 #to check variable order again
 data.table(colnames(dbn))

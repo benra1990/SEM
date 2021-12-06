@@ -39,11 +39,11 @@ tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot
 product<-db_short[c("productivity_water_sup","productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber", "productivity_recreation")]##productivity or yield variables (mean yield per ha)
 ginis<-db_short[c("gini_water_sup_prod", "gini_water_sup_tot","gini_water_reg_prod","gini_water_reg_tot","gini_cseq_prod","gini_cseq_tot","gini_cstor_prod","gini_cstor_tot","gini_erosion_prod","gini_erosion_tot","gini_timber_prod","gini_timber_tot","gini_recreation_prod", "gini_recreation_tot")]##Gini coefficients of ES supply variables
 income<-db_short[c("weighted_mean_income","weighted_gini_income")]##mean income & gini income
-area<-db_short[,"area_promedio_predios"]##mean area  of all the properties within a municipality
+area<-db_short[c("area_promedio_predios", "gini_land")]##mean area  of all the properties within a municipality
 data.table(colnames(db_short))#check order of columns
 
 db<-data.frame(ha,income,area, product,tot_sup,ginis)#
-colnames(db)[c(1:5)]<-c("rur", "indig","educa","inc", "gini_income")
+colnames(db)[c(1:7)]<-c("rur", "indig","educa","inc", "gini_income", "area", "gini_area")
 data.table(colnames(db))
 
 sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
@@ -157,7 +157,7 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
 
          #Regressions
 
-         inc~sup_prov+ha+area
+         gini_income~sup_prov+ha+area
          sup_prov~ha+area
          area~ha
         
@@ -257,7 +257,9 @@ model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
           rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
           varrur>0
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)'
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         
+         '
         
 
 #Step 2: Model estimation
@@ -420,7 +422,7 @@ model1b_yield_prov<-'#Structural model using inequality indicators
 
          #Regressions
          gini_income~gini_prov+ha+gini_land
-         gini_prov~ha+gini_land
+         gini_prov~ha+gini_area
          gini_land~ha
     
         #New parameter (possible new indirect parameter if there are some)

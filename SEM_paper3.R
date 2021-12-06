@@ -7,21 +7,21 @@
 
 ##Libraries##
 
-install.packages(c("lavaan","semPlot","corrplot","matrixcalc" ))
+#install.packages(c("lavaan","semPlot","corrplot","matrixcalc" ))
 library(lavaan)
 library(semPlot)
 library(matrixcalc)
 library(corrplot)
 library(openxlsx)
 library(data.table)
-install.packages("bestNormalize")
+#install.packages("bestNormalize")
 library(bestNormalize)
 library(corrplot)
-install.packages("corrr")
+#install.packages("corrr")
 library(corrr)
 library(Hmisc)
 library(dplyr)
-uninstall.packages("semPlot")
+
 
 ##Import database
 db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/database_short.xlsx")# this will change depending on where you have it on your computers!
@@ -98,7 +98,7 @@ bestNormalize(db$gini_income)
 #land size
 bestNormalize(db$area)
        
-# Transform ecosystem service variables to try to meet normality
+# Transform ecosystem service variables to try to meet normality.
 db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(productivity_water_sup+1)),
                productivity_water_regulation=predict(bestNormalize::orderNorm         (productivity_water_regulation)),
                   productivity_cseq=predict(bestNormalize::orderNorm (productivity_cseq)),      productivity_cstor=predict(bestNormalize::sqrt_x(productivity_cstor+1)),
@@ -125,7 +125,7 @@ db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(producti
                         
 )->dbn#new data base with normalized variables is "dbn"
 
-dbn<-lapply(db[,c(1:35)], scales::rescale)#rescaling data 0 to 1
+dbn<-lapply(db[,c(1:35)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
 dbn<-as.data.frame(dbn)# transforming to dataframe again
 
 #new histogram
@@ -157,7 +157,7 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
 
          #Regressions
 
-         gini_income~sup_prov+ha+area
+        inc~sup_prov+ha+area
          sup_prov~ha+area
          area~ha
         
@@ -662,14 +662,29 @@ modindices(model1b_total_cult_fit, sort.=TRUE,minimum.value = 10)
 model1_yield<-cbind(uno_a_yield_prov,uno_b_yield_prov,uno_a_yield_reg,uno_b_yield_reg,uno_a_yield_cult,uno_b_yield_cult)
 colnames(model1_yield)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
 model1_yield<-format(round(model1_yield,2),nsmall = 2)
-model1_yield<-as.data.frame(model1_yield)
-write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders!
+#model1_yield<-as.data.frame(model1_yield)
+model1_yield_not_normalized<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+#write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model1_yield_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield_not_normalized.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+
+
+
 
 model1_total<-cbind(uno_a_total_prov,uno_b_total_prov,uno_a_total_reg,uno_b_total_reg,uno_a_total_cult,uno_b_total_cult)
 colnames(model1_total)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
 model1_total<-format(round(model1_total,2),nsmall = 2)
-model1_total<-as.data.frame(model1_total)
-write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
+#model1_total<-as.data.frame(model1_total)
+model1_total_not_normalized<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+#write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
+write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total_not_normalized.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+
+
+
+
+
+
+
+
 
 
 

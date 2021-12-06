@@ -21,7 +21,7 @@ install.packages("corrr")
 library(corrr)
 library(Hmisc)
 library(dplyr)
-
+uninstall.packages("semPlot")
 
 ##Import database
 db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/database_short.xlsx")# this will change depending on where you have it on your computers!
@@ -57,12 +57,12 @@ for (i in 1:length(db))  { ##transform all variables to numeric
 }
 
 #Histograms for all variables
-windows()
+#windows()
 par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:34) {
-  hist(db[,c(1:34)][,i],main=names(db [,c(1:34)])[i],xlab=names(db[,c(1:34)])[i])
+for (i in 1:35) {
+  hist(db[,c(1:35)][,i],main=names(db [,c(1:35)])[i],xlab=names(db[,c(1:35)])[i])
 }
-dev.off()
+#dev.off()
 #check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
 #yield/productivity
 bestNormalize(db$productivity_water_sup)
@@ -125,14 +125,14 @@ db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(producti
                         
 )->dbn#new data base with normalized variables is "dbn"
 
-dbn<-lapply(db[,c(1:34)], scales::rescale)#rescaling data 0 to 1
+dbn<-lapply(db[,c(1:35)], scales::rescale)#rescaling data 0 to 1
 dbn<-as.data.frame(dbn)# transforming to dataframe again
 
 #new histogram
 
 par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:34) {
-  hist(dbn[,c(1:34)][,i],main=names(dbn [,c(1:34)])[i],xlab=names(dbn [,c(1:34)])[i])
+for (i in 1:35) {
+  hist(dbn[,c(1:35)][,i],main=names(dbn [,c(1:35)])[i],xlab=names(dbn [,c(1:35)])[i])
 }
  
 #check correlations between measurable variables of human agency
@@ -421,9 +421,9 @@ model1b_yield_prov<-'#Structural model using inequality indicators
            ha=~+educa+rur+indig
 
          #Regressions
-         gini_income~gini_prov+ha+gini_land
+         gini_income~gini_prov+ha+gini_area
          gini_prov~ha+gini_area
-         gini_land~ha
+         gini_area~ha
     
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -463,16 +463,17 @@ model1b_yield_reg<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
         
          #Regressions
-         gini_income~gini_reg+ha+gini_land
-         gini_reg~ha+gini_land
-         gini_land~ha
+         gini_income~gini_reg+ha+gini_area
+         gini_reg~ha+gini_area
+         gini_area~ha
          
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
          #~~
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)       
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)     
+           
 '
 
 #Step 2: Model estimation
@@ -503,9 +504,9 @@ model1b_yield_cult<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
 
          #Regressions
-         gini_income~gini_recreation_prod+ha+gini_land
-         gini_recreation_prod~ha+gini_land
-         gini_land~ha
+         gini_income~gini_recreation_prod+ha+gini_area
+         gini_recreation_prod~ha+gini_area
+         gini_area~ha
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -542,9 +543,9 @@ model1b_total_prov<-'#Structural model using inequality indicators
            ha=~+educa+rur+indig
 
          #Regressions
-         gini_income~gini_tot+ha+gini_land
-         gini_tot~ha+gini_land
-         gini_land~ha
+         gini_income~gini_tot+ha+gini_area
+         gini_tot~ha+gini_area
+         gini_area~ha
     
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -582,9 +583,9 @@ model1b_total_reg<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
         
          #Regressions
-         gini_income~gini_reg+ha+gini_land
-         gini_reg~ha+gini_land
-         gini_land~ha
+         gini_income~gini_reg+ha+gini_area
+         gini_reg~ha+gini_area
+         gini_area~ha
          
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -622,9 +623,9 @@ model1b_total_cult<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
          
          #Regressions
-         gini_income~gini_recreation_tot+ha+gini_land
-         gini_recreation_tot~ha+gini_land
-         gini_land~ha
+         gini_income~gini_recreation_tot+ha+gini_area
+         gini_recreation_tot~ha+gini_area
+         gini_area~ha
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect

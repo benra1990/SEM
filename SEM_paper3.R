@@ -7,15 +7,17 @@
 
 ##Libraries##
 
-install.packages(c("lavaan","semPlot","corrplot" ))
+install.packages(c("lavaan","semPlot","corrplot","matrixcalc" ))
 library(lavaan)
 library(semPlot)
+library(matrixcalc)
 library(corrplot)
 library(openxlsx)
 library(data.table)
 install.packages("bestNormalize")
 library(bestNormalize)
 library(corrplot)
+install.packages("corrr")
 library(corrr)
 library(Hmisc)
 library(dplyr)
@@ -90,7 +92,7 @@ bestNormalize(db$tot_pop)
 bestNormalize(db$dist_cities)
                  
 #income
-bestNormalize(db$income)
+bestNormalize(db$inc)
 bestNormalize(db$gini_income)
 
 #land size
@@ -134,8 +136,8 @@ for (i in 1:34) {
 }
  
 #check correlations between measurable variables of human agency
-cor_datos<-cor(db[,1:3], use="pairwise.complete.obs", method="spearman")
-cor_matrix<-rcorr(as.matrix(db[,1:3]))
+cor_datos<-cor(dbn[,1:3], use="pairwise.complete.obs", method="spearman")
+cor_matrix<-rcorr(as.matrix(dbn[,1:3]))
 
 #to check variable order again
 data.table(colnames(dbn))

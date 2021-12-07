@@ -157,7 +157,7 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
 
          #Regressions
 
-        inc~sup_prov+ha+area
+        gini_gini_incomeome~sup_prov+ha+area
          sup_prov~ha+area
          area~ha
         
@@ -167,7 +167,7 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
          #Covariance structure(of latent variables)
           #~~
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
       
 '
 #Step 2: Model estimation
@@ -202,7 +202,7 @@ model1a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
           ha=~+educa+rur+indig
 
          #Regressions
-         inc~sup_reg+ha+area
+         gini_income~sup_reg+ha+area
          sup_reg~ha+area
          area~ha
 
@@ -212,9 +212,9 @@ model1a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
          #Covariance structure(of latent variables)
           rur~~varrur*rur#avoid variance of rurality to become negative
           varrur>0
-          #income~~ha+area
+          #gini_incomeome~~ha+area
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         '
 
 #Step 2: Model estimation
@@ -246,7 +246,7 @@ model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
          ha=~+educa+rur+indig
 
          #Regressions
-         inc~productivity_recreation+ha+area
+         gini_income~productivity_recreation+ha+area
          productivity_recreation~ha+area
          area~ha
         
@@ -257,7 +257,7 @@ model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
           rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
           varrur>0
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
          
          '
         
@@ -293,7 +293,7 @@ model1a_total_prov<-'#Structural model using raw indicators - ES yield (provisio
           ha=~+educa+rur+indig
 
          #Regression
-         inc~tot_prov+ha+area
+         gini_income~tot_prov+ha+area
          tot_prov~ha+area
          area~ha
         
@@ -306,7 +306,7 @@ model1a_total_prov<-'#Structural model using raw indicators - ES yield (provisio
          # tot_prov~~vartot_prov*tot_prov
          # tot_prov>0
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)     
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)     
 '
 
 #Step 2: Model estimation
@@ -337,7 +337,7 @@ model1a_total_reg<-'#Structural model using raw indicators - ES yield (provision
           ha=~+educa+rur+indig
 
          #Regressions
-         inc~tot_reg+ha+area
+         gini_income~tot_reg+ha+area
          tot_reg~ha+area
          area~ha
 
@@ -348,7 +348,7 @@ model1a_total_reg<-'#Structural model using raw indicators - ES yield (provision
           
           #~~
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         '
 
 #Step 2: Model estimation
@@ -378,7 +378,7 @@ model1a_total_cult<-'#Structural model using raw indicators - ES yield (provisio
          ha=~+educa+rur+indig
 
          #Regressions
-         inc~tot_supl_recreation+ha+area
+         gini_income~tot_supl_recreation+ha+area
          tot_supl_recreation~ha+area
          area~ha
         
@@ -387,7 +387,7 @@ model1a_total_cult<-'#Structural model using raw indicators - ES yield (provisio
 
          #Covariance structure(of latent variables)   
       
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         
 '
 #Step 2: Model estimation
@@ -430,7 +430,7 @@ model1b_yield_prov<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model) 
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model) 
 '
 
 #Step 2: Model estimation
@@ -463,7 +463,7 @@ model1b_yield_reg<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
         
          #Regressions
-         gini_income~gini_reg+ha+gini_area
+         gini_gini_incomeome~gini_reg+ha+gini_area
          gini_reg~ha+gini_area
          gini_area~ha
          
@@ -472,7 +472,7 @@ model1b_yield_reg<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          #~~
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)     
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)     
            
 '
 
@@ -504,7 +504,7 @@ model1b_yield_cult<-'#Structural model using inequality indicators
          ha=~+educa+rur+indig
 
          #Regressions
-         gini_income~gini_recreation_prod+ha+gini_area
+         gini_gini_incomeome~gini_recreation_prod+ha+gini_area
          gini_recreation_prod~ha+gini_area
          gini_area~ha
         
@@ -513,7 +513,7 @@ model1b_yield_cult<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
 '
 
 #Step 2: Model estimation
@@ -552,7 +552,7 @@ model1b_total_prov<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
 '
 
 #Step 2: Model estimation
@@ -592,7 +592,7 @@ model1b_total_reg<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          #~~
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model    
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model    
 '
 
 #Step 2: Model estimation
@@ -632,7 +632,7 @@ model1b_total_cult<-'#Structural model using inequality indicators
 
          #Covariance structure(of latent variables)
          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
 '
 
 #Step 2: Model estimation
@@ -663,9 +663,9 @@ model1_yield<-cbind(uno_a_yield_prov,uno_b_yield_prov,uno_a_yield_reg,uno_b_yiel
 colnames(model1_yield)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
 model1_yield<-format(round(model1_yield,2),nsmall = 2)
 #model1_yield<-as.data.frame(model1_yield)
-model1_yield_not_normalized<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+model1_yield_gini_outcome<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
 #write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
-write.xlsx(model1_yield_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield_not_normalized.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model1_yield_gini_outcome, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield_gini_outcome.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 
 
 
@@ -674,9 +674,18 @@ model1_total<-cbind(uno_a_total_prov,uno_b_total_prov,uno_a_total_reg,uno_b_tota
 colnames(model1_total)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
 model1_total<-format(round(model1_total,2),nsmall = 2)
 #model1_total<-as.data.frame(model1_total)
-model1_total_not_normalized<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+model1_total_gini_outcome<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
 #write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
-write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total_not_normalized.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model1_total_gini_outcome, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total_gini_outcomed.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+
+
+
+
+
+
+
+
+
 
 
 

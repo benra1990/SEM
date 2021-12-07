@@ -687,97 +687,302 @@ write.xlsx(model1_total_gini_outcome, "H:/SIG/Procesos SIG/Spatial distribution/
 
 
 
-
-
-
-
-
-
-
-
-
-
-##I haven't developed model 2 yet!
-
-
 #####Model 2: Regression model with "ES supply inequality" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural service.####
 
-model2a<-'#Structural model provisioning services(the service category is changes in each run)
+
+
+
+####Model 2a (yield)####
+#Step 1: Model specification
+
+model2a_yield_prov<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
-         #Measurement models/defining latent variables,variables that cannot be dierectly measured
+         #Measurement models/defining latent variables,variables that cannot be directly measured
          
-         #sup_prov=~productivity_water_sup+productivity_timber
-          sup_prov=~tot_water_sup+tot_supl_timber
-           
-         ha=~+educa+rur+indig+dist_cities+tot_pop
-         
-         #g_sup=~gini_water_sup_prod+gini_timber_prod
-         g_sup=~gini_water_sup_tot+gini_timber_tot
-         
-         income=~inc
-         
-  
+          sup_prov=~productivity_water_sup+productivity_timber
+          ha=~+educa+rur+indig
+
          #Regressions
-         g_sup~sup_prov
-         sup_prov~ha
-         sup_prov~area
-         area~ha
-         area~income
-         g_sup~income
-     
+
+         sup_prov~inc+ha+area
+         inc~ha
+         area~ha+inc
         
-        # New parameter (possible new indirect parameter if there are some)
+        #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
-          #g_sup~~sup_prov+area+ha
-          #ha~~ha
-          #sup_prov~~sup_prov
-          
-          
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be included in the model)
-        
-          #dist_cities~~rur
-          #tot_pop~~rur
-          #tot_pop~~indig
-          #educa~~indig
-          #educa~~rur
-          #pov_percentage~~rur
-          #indig~~indig
-          #rur~rur
-         # pov_percentage~~pov_percentage
-         # tot_pop~~tot_pop
-          #educa~~educa
-         # dist_cities~~dist_cities
-          #productivity_water_sup~~productivity_timber
-        
+          #~~
+         
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
+      
 '
+#Step 2: Model estimation
+
+model2a_yield_prov_fit<-sem(model2a_yield_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+
+#Step 3: Evaluate the model
+summary(model2a_yield_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+dos_a_yield_prov<-fitMeasures(model2a_yield_prov_fit, c("cfi","rmsea","srmr", "pvalue"))
+inspect(model2a_yield_prov_fit,"r2")
+
+#Residuals
+resid(model2a_yield_prov_fit)
+
+#Model-implied covariance matrix
+fitted(model2a_yield_prov_fit)
+parameterEstimates(model2a_yield_prov_fit)#gives the currently use parameters of the model fit
+
+#Step 4: VIsualize the path model
+semPlot::semPaths(model2a_yield_prov_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+
+#Modification of indices (it's good for exploring but we need to assess if it makes sense to use the suggestions)
+modindices(model2a_yield_prov_fit, sort.=TRUE,minimum.value = 10)
+
+
+##model2a_yield_reg##
+
+model2a_yield_reg<-'#Structural model using raw indicators - ES yield (provisioning ES)
+        
+           #Measurement models/defining latent variables,variables that cannot be directly measured
+         
+          sup_reg=~productivity_water_sup+productivity_timber
+          ha=~+educa+rur+indig
+
+         #Regressions
+
+         sup_reg~inc+ha+area
+         inc~ha
+         area~ha+inc
+
+        #New parameter (possible new indirect parameter if there are some)
+           #g_sup:=ha*area#indirect effect
+
+         #Covariance structure(of latent variables)
+          rur~~varrur*rur#avoid variance of rurality to become negative
+          varrur>0
+          #gini_incomeome~~ha+area
+         
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
+        '
+
+#Step 2: Model estimation
+model2a_yield_reg_fit<-sem(model2a_yield_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+
+#Step 3: Evaluate the model
+summary(model2a_yield_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+
+#summary(model2a_yield_fit, fit.measures=TRUE)
+dos_a_yield_reg<-fitMeasures(model2a_yield_reg_fit, c("cfi","rmsea","srmr", "pvalue"))
+
+#Residuals
+resid(model2a_yield_reg_fit)
+
+#Model-implied covariance matrix
+fitted(model2a_yield_reg_fit)
+parameterEstimates(model2a_yield_reg_fit)#gives the currently use parameters of the model fit
+
+#Step 4: VIsualize the path model
+semPlot::semPaths(model2a_yield_reg_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+
+#Modification of indices
+modindices(model2a_yield_reg_fit, sort.=TRUE,minimum.value = 10)
+
+
+##model2a_yield_cult##
+model2a_yield_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
+        
+       #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable.          Only human agency(ha) is defined here as latent variable
+         ha=~+educa+rur+indig
+
+         #Regressions
+         productivity_recreation~inc+ha+area
+         area~ha+inc
+         inc~ha
+        
+        #New parameter (possible new indirect parameter if there are some)
+           #g_sup:=ha*area#indirect effect
+
+         #Covariance structure(of latent variables)
+          rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
+          varrur>0
+         
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
+         
+         '
 
 
 #Step 2: Model estimation
-
-model2a.fit<-sem(model2a, data=db, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE
+model2a_yield_cult_fit<-sem(model2a_yield_cult, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
 
 #Step 3: Evaluate the model
+summary(model2a_yield_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+dos_a_yield_cult<-fitMeasures(model2a_yield_cult_fit, c("cfi","rmsea","srmr", "pvalue"))
 
-summary(model2a.fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-summary(model2a.fit, fit.measures=TRUE)
-
-# Residuals
-resid(model2a.fit)
+#Residuals
+resid(model2a_yield_cult_fit)
 
 #Model-implied covariance matrix
-fitted(model2a.fit)
-
-parameterEstimates(model2a.fit)#gives the currently use parameters of the model fit
+fitted(model2a_yield_cult_fit)
+parameterEstimates(model2a_yield_cult_fit)#gives the currently use parameters of the model fit
 
 #Step 4: VIsualize the path model
-
-semPlot::semPaths(model1a.fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+semPlot::semPaths(model2a_yield_cult_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
 
 #Modification of indices
-modindices(model2a.fit, sort.=TRUE,minimum.value = 10)
+modindices(model2a_yield_cult_fit, sort.=TRUE,minimum.value = 10)
 
+
+####model 2a (total)####
+
+#Step 1: Model specification
+
+model2a_total_prov<-'#Structural model using raw indicators - ES yield (provisioning ES)
+        
+         #Measurement models/defining latent variables,variables that cannot be directly measured
+          tot_prov=~tot_water_sup+tot_supl_timber
+          ha=~+educa+rur+indig
+
+         #Regression
+         tot_prov~inc+ha+area
+         inc~ha
+         area~ha+inc
+        
+        #New parameter (possible new indirect parameter if there are some)
+           #g_sup:=ha*area#indirect effect
+
+         #Covariance structure(of latent variables)
+         # rur~~varrur*rur#avoid variance of rurality to become negative
+         # varrur>0
+         # tot_prov~~vartot_prov*tot_prov
+         # tot_prov>0
+         
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)     
+'
+
+#Step 2: Model estimation
+model2a_total_prov_fit<-sem(model2a_total_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+
+#Step 3: Evaluate the model
+summary(model2a_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+dos_a_total_prov<-fitMeasures(model2a_total_prov_fit, c("cfi","rmsea","srmr", "pvalue"))
+
+#Residuals
+resid(model2a_total_prov_fit)
+
+#Model-implied covariance matrix
+fitted(model2a_total_prov_fit)
+parameterEstimates(model2a_total_prov_fit)#gives the currently use parameters of the model fit
+
+#Step 4: VIsualize the path model
+semPlot::semPaths(model2a_total_prov_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+
+#Modification of indices
+modindices(model2a_total_prov_fit, sort.=TRUE,minimum.value = 10)
+
+
+##model2a_total_reg##
+model2a_total_reg<-'#Structural model using raw indicators - ES yield (provisioning ES)
+        
+         #Measurement models/defining latent variables,variables that cannot be directly measured
+          tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
+          ha=~+educa+rur+indig
+
+         #Regressions
+         tot_reg~inc+ha+area
+         inc~ha
+         area~ha+inc
+
+        #New parameter (possible new indirect parameter if there are some)
+           #g_sup:=ha*area#indirect effect
+
+         #Covariance structure(of latent variables)
+          
+          #~~
+         
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
+        '
+
+#Step 2: Model estimation
+model2a_total_reg_fit<-sem(model2a_total_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+
+#Step 3: Evaluate the model
+summary(model2a_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+dos_a_total_reg<-fitMeasures(model2a_total_reg_fit, c("cfi","rmsea","srmr", "pvalue"))
+
+#Residuals
+resid(model2a_total_reg_fit)
+
+#Model-implied covariance matrix
+fitted(model2a_total_reg_fit)
+parameterEstimates(model2a_total_reg_fit)#gives the currently used parameters of the model fit
+
+#Step 4: VIsualize the path model
+semPlot::semPaths(model2a_total_reg_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+
+#Modification of indices
+modindices(model2a_total_reg_fit, sort.=TRUE,minimum.value = 10)
+
+
+##model2a_total_cult##
+model2a_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
+        
+         #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable. Only human agency(ha) is defined here as latent variable
+         ha=~+educa+rur+indig
+
+         #Regressions
+         tot_supl_recreation~inc+tot_supl_recreation+ha+area
+         inc~ha
+         area~ha+inc
+        
+        #New parameter (possible new indirect parameter if there are some)
+           #g_sup:=ha*area#indirect effect
+
+         #Covariance structure(of latent variables)   
+      
+         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
+        
+'
+#Step 2: Model estimation
+model2a_total_cult_fit<-sem(model2a_total_cult, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+
+#Step 3: Evaluate the model
+summary(model2a_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
+dos_a_total_cult<-fitMeasures(model2a_total_cult_fit, c("cfi","rmsea","srmr", "pvalue"))
+
+#Residuals
+resid(model2a_total_cult_fit)
+
+#Model-implied covariance matrix
+fitted(model2a_total_cult_fit)
+parameterEstimates(model2a_total_cult_fit)#gives the currently use parameters of the model fit
+
+#Step 4: VIsualize the path model
+semPlot::semPaths(model2a_total_cult_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+
+#Modification of indices
+modindices(model2a_total_cult_fit, sort.=TRUE,minimum.value = 10)
+
+
+####Results model 2####
+
+model2_yield<-cbind(dos_a_yield_prov,dos_a_yield_reg,dos_a_yield_cult)
+colnames(model2_yield)<-c("provisioning","regulating", "cultural")
+model2_yield<-format(round(model2_yield,2),nsmall = 2)
+#model2_yield<-as.data.frame(model2_yield)
+model2_yield<-as.data.frame(model2_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+#write.xlsx(model2_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model2_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+
+
+
+model2_total<-cbind(dos_a_total_prov,dos_a_total_reg,dos_a_total_cult)
+colnames(model2_total)<-c("raw_prov","raw_reg", "raw_cult")
+model2_total<-format(round(model2_total,2),nsmall = 2)
+#model2_total<-as.data.frame(model2_total)
+model2_total<-as.data.frame(model2_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+#write.xlsx(model2_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
+write.xlsx(model2_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 
 
 
@@ -787,6 +992,32 @@ modindices(model2a.fit, sort.=TRUE,minimum.value = 10)
 ##Model comparison: ANOVA
 
 anova(model1, model2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

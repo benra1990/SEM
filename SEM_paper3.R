@@ -24,7 +24,7 @@ library(dplyr)
 
 
 ##Import database
-db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/database_short.xlsx")# this will change depending on where you have it on your computers!
+db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# this will change depending on where you have it on your computers!
 str(db_short)#check structure
 data.table(colnames(db_short))#get order of columns in the dataframe
 
@@ -34,16 +34,16 @@ data.table(colnames(db_short))#get order of columns in the dataframe
 
 #Generating subset of variables to be used and new working dataframe named"db"
 
-ha<-db_short[c("P_RUR", "P_INDIG", "prof_ed_univ")]##human agency
+ha<-db_short[c("Prod_indiv","pers_jurid","indig_area", "prof_ed_univ","age" )]##human agency
 tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]##variables of total supply (all supply within the limits of each municipality)
 product<-db_short[c("productivity_water_sup","productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber", "productivity_recreation")]##productivity or yield variables (mean yield per ha)
 ginis<-db_short[c("gini_water_sup_prod", "gini_water_sup_tot","gini_water_reg_prod","gini_water_reg_tot","gini_cseq_prod","gini_cseq_tot","gini_cstor_prod","gini_cstor_tot","gini_erosion_prod","gini_erosion_tot","gini_timber_prod","gini_timber_tot","gini_recreation_prod", "gini_recreation_tot")]##Gini coefficients of ES supply variables
-income<-db_short[c("weighted_mean_income","weighted_gini_income")]##mean income & gini income
+income<-db_short[c("weighted_mean_income","weighted_gini_income")]##mean income & gini income (data chile)
 area<-db_short[c("area_promedio_predios", "gini_land")]##mean area  of all the properties within a municipality
 data.table(colnames(db_short))#check order of columns
 
 db<-data.frame(ha,income,area, product,tot_sup,ginis)#
-colnames(db)[c(1:7)]<-c("rur", "indig","educa","inc", "gini_income", "area", "gini_area")
+colnames(db)[c(1:9)]<-c("indiv","jurid","indig","educa","age","inc","gini_income", "area", "gini_area")
 data.table(colnames(db))
 
 sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
@@ -59,8 +59,8 @@ for (i in 1:length(db))  { ##transform all variables to numeric
 #Histograms for all variables
 #windows()
 par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:35) {
-  hist(db[,c(1:35)][,i],main=names(db [,c(1:35)])[i],xlab=names(db[,c(1:35)])[i])
+for (i in 1:37) {
+  hist(db[,c(1:37)][,i],main=names(db [,c(1:37)])[i],xlab=names(db[,c(1:37)])[i])
 }
 #dev.off()
 #check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
@@ -125,14 +125,14 @@ db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(producti
                         
 )->dbn#new data base with normalized variables is "dbn"
 
-dbn<-lapply(db[,c(1:35)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
+dbn<-lapply(db[,c(1:37)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
 dbn<-as.data.frame(dbn)# transforming to dataframe again
 
 #new histogram
 
 par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:35) {
-  hist(dbn[,c(1:35)][,i],main=names(dbn [,c(1:35)])[i],xlab=names(dbn [,c(1:35)])[i])
+for (i in 1:37) {
+  hist(dbn[,c(1:37)][,i],main=names(dbn [,c(1:37)])[i],xlab=names(dbn [,c(1:37)])[i])
 }
  
 #check correlations between measurable variables of human agency
@@ -153,13 +153,14 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
          #Measurement models/defining latent variables,variables that cannot be directly measured
          
           sup_prov=~productivity_water_sup+productivity_timber
-          ha=~+educa+rur+indig
+          #ha=~+educa+indig+age+indiv_produc+soc_prod
 
          #Regressions
 
-        gini_gini_incomeome~sup_prov+ha+area
-         sup_prov~ha+area
-         area~ha
+        inc~sup_prov
+        sup_prov~area
+        # sup_prov~ha+area
+#area~ha
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -924,6 +925,7 @@ semPlot::semPaths(model2a_total_reg_fit, rotation=2, layout="tree2",intercepts=F
 modindices(model2a_total_reg_fit, sort.=TRUE,minimum.value = 10)
 
 
+
 ##model2a_total_cult##
 model2a_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
@@ -939,6 +941,7 @@ model2a_total_cult<-'#Structural model using raw indicators - ES yield (provisio
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)   
+         
       
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         

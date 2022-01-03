@@ -84,20 +84,23 @@ bestNormalize(db$tot_supl_timber)
 bestNormalize(db$tot_supl_recreation)
 
 #human agency
-bestNormalize(db$pov_persons)
-bestNormalize(db$pov_percentage)
-bestNormalize(db$rur)
-bestNormalize(db$indig)
+#bestNormalize(db$pov_persons)
+#bestNormalize(db$pov_percentage)
+#bestNormalize(db$rur)
+bestNormalize(db$indig_censoP)
 bestNormalize(db$educa)
-bestNormalize(db$tot_pop)
-bestNormalize(db$dist_cities)
-                 
+#bestNormalize(db$tot_pop)
+#bestNormalize(db$dist_cities)
+bestNormalize(db$indiv)
+bestNormalize(db$jurid)
+bestNormalize(db$age)
+bestNormalize(db$area)
+                
+                
 #income
 bestNormalize(db$inc)
-bestNormalize(db$gini_income)
+#bestNormalize(db$gini_income)
 
-#land size
-bestNormalize(db$area)
        
 # Transform ecosystem service variables to try to meet normality.
 db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(productivity_water_sup+1)),
@@ -113,27 +116,27 @@ db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(producti
                        tot_supl_erosion=predict(arcsinh_x(tot_supl_erosion)),
                        tot_supl_timber=predict(yeojohnson(tot_supl_timber)),
                         tot_supl_recreation=predict(bestNormalize::boxcox(tot_supl_recreation)),
-                        area=predict(bestNormalize::boxcox(area)),
-                   pov_persons=predict(bestNormalize::orderNorm(pov_persons)),
-                      pov_percentage=predict(bestNormalize::arcsinh_x(pov_percentage)),   
-                          rur=predict(bestNormalize::yeojohnson(rur)),   
-                               indig=predict (bestNormalize::orderNorm(indig)),   
-                                  educa=predict (bestNormalize::orderNorm(educa)), 
-                                    tot_pop=predict (bestNormalize::boxcox(tot_pop)), 
-                                       dist_cities=predict (bestNormalize::orderNorm(dist_cities)),
-               inc=predict (bestNormalize::boxcox(inc)),
-               gini_inc=predict (orderNorm(gini_inc))
+                        #human agency
+                         area=predict(bestNormalize::boxcox(area)),
+                         indig_censoP=predict (bestNormalize::orderNorm(indig_censoP)),   
+                          educa=predict (bestNormalize::orderNorm(educa)), 
+                           indiv=predict(bestNormalize::orderNorm(indiv)),
+                            jurid=predict(bestNormalize::yeojohnson(jurid)),
+                             age=predict(bestNormalize::orderNorm(age)),
+                          #income
+                          inc=predict (bestNormalize::boxcox(inc))
+               
                         
 )->dbn#new data base with normalized variables is "dbn"
 
-dbn<-lapply(db[,c(1:37)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
+dbn<-lapply(dbn[,c(1:38)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
 dbn<-as.data.frame(dbn)# transforming to dataframe again
 
 #new histogram
 
 par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:37) {
-  hist(dbn[,c(1:37)][,i],main=names(dbn [,c(1:37)])[i],xlab=names(dbn [,c(1:37)])[i])
+for (i in 1:38) {
+  hist(dbn[,c(1:38)][,i],main=names(dbn [,c(1:38)])[i],xlab=names(dbn [,c(1:38)])[i])
 }
  
 #check correlations between all measurement variables (exogenous variables)
@@ -171,7 +174,6 @@ write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlacio
 #cor_matrix<-rcorr(as.matrix(dbn[c(1:16)]))
 
 
-
 #to check variable order again
 data.table(colnames(dbn))
 
@@ -186,13 +188,12 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
          #Measurement models/defining latent variables,variables that cannot be directly measured
          
           sup_prov=~productivity_water_sup+productivity_timber
-          #ha=~+educa+indig+age+indiv_produc+soc_prod
+          ha=~+educa+indig_censoP+age+indiv+jurid+area
 
          #Regressions
 
-        inc~sup_prov
-        sup_prov~area
-        # sup_prov~ha+area
+        inc~ha+sup_prov
+        sup_prov~ha
 #area~ha
         
         #New parameter (possible new indirect parameter if there are some)
@@ -233,20 +234,20 @@ model1a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
          #Measurement models/defining latent variables,variables that cannot be directly measured
 
           sup_reg=~productivity_water_regulation+productivity_cseq+productivity_cstor+productivity_erosion
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv+jurid+area
 
          #Regressions
-         gini_income~sup_reg+ha+area
-         sup_reg~ha+area
-         area~ha
+         inc~sup_reg+ha
+         sup_reg~ha
+         
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
-          rur~~varrur*rur#avoid variance of rurality to become negative
-          varrur>0
-          #gini_incomeome~~ha+area
+          #rur~~varrur*rur#avoid variance of rurality to become negative
+          #varrur>0
+          #gini_income~~ha+area
          
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         '
@@ -277,19 +278,19 @@ modindices(model1a_yield_reg_fit, sort.=TRUE,minimum.value = 10)
 model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
        #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable.          Only human agency(ha) is defined here as latent variable
-         ha=~+educa+rur+indig
+         ha=~+educa+indig_censoP+age+indiv+jurid+area
 
          #Regressions
-         gini_income~productivity_recreation+ha+area
-         productivity_recreation~ha+area
-         area~ha
+         inc~productivity_recreation+ha
+         productivity_recreation~ha
+         
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
-          rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
-          varrur>0
+         # rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
+          #varrur>0
          
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
          
@@ -324,12 +325,12 @@ model1a_total_prov<-'#Structural model using raw indicators - ES yield (provisio
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_prov=~tot_water_sup+tot_supl_timber
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
 
          #Regression
-         gini_income~tot_prov+ha+area
-         tot_prov~ha+area
-         area~ha
+         gini_income~tot_prov+ha
+         tot_prov~ha
+         
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -368,12 +369,11 @@ model1a_total_reg<-'#Structural model using raw indicators - ES yield (provision
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
 
          #Regressions
-         gini_income~tot_reg+ha+area
-         tot_reg~ha+area
-         area~ha
+         gini_income~tot_reg+ha
+         tot_reg~ha
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -409,12 +409,11 @@ modindices(model1a_total_reg_fit, sort.=TRUE,minimum.value = 10)
 model1a_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable. Only human agency(ha) is defined here as latent variable
-         ha=~+educa+rur+indig
+        ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
 
          #Regressions
-         gini_income~tot_supl_recreation+ha+area
-         tot_supl_recreation~ha+area
-         area~ha
+         gini_income~tot_supl_recreation+ha
+         tot_supl_recreation~ha
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -452,11 +451,11 @@ model1b_yield_prov<-'#Structural model using inequality indicators
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
            gini_prov=~gini_water_sup_prod+gini_timber_prod
-           ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
 
          #Regressions
-         gini_income~gini_prov+ha+gini_area
-         gini_prov~ha+gini_area
+         gini_income~gini_prov+ha
+         gini_prov~ha
          gini_area~ha
     
         #New parameter (possible new indirect parameter if there are some)
@@ -494,7 +493,7 @@ model1b_yield_reg<-'#Structural model using inequality indicators
         
          #Measurement models/defining latent variables,variables that cannot be directly measured       
          gini_reg=~gini_water_reg_prod+gini_cseq_prod+gini_cstor_prod+gini_erosion_prod
-         ha=~+educa+rur+indig
+         ha=~+educa+rur+indig_censoP
         
          #Regressions
          gini_gini_incomeome~gini_reg+ha+gini_area
@@ -535,7 +534,7 @@ modindices(model1b_yield_reg_fit, sort.=TRUE,minimum.value = 10)
 model1b_yield_cult<-'#Structural model using inequality indicators
         
          #Measurement models/defining latent variables,variables that cannot be directly measured      
-         ha=~+educa+rur+indig
+         ha=~+educa+rur+indig_censoP
 
          #Regressions
          gini_gini_incomeome~gini_recreation_prod+ha+gini_area
@@ -574,12 +573,11 @@ modindices(model1b_yield_cult_fit, sort.=TRUE,minimum.value = 10)
 model1b_total_prov<-'#Structural model using inequality indicators  
          #Measurement models/defining latent variables,variables that cannot be directly measured       
            gini_tot=~gini_water_sup_tot+gini_timber_tot
-           ha=~+educa+rur+indig
+           ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
 
          #Regressions
-         gini_income~gini_tot+ha+gini_area
-         gini_tot~ha+gini_area
-         gini_area~ha
+         gini_income~gini_tot+ha
+         gini_tot~ha
     
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -614,7 +612,7 @@ modindices(model1b_total_prov_fit, sort.=TRUE,minimum.value = 10)
 model1b_total_reg<-'#Structural model using inequality indicators       
          #Measurement models/defining latent variables,variables that cannot be directly measured
          gini_reg=~gini_water_reg_tot+gini_cseq_tot+gini_cstor_tot+gini_erosion_tot
-         ha=~+educa+rur+indig
+         ha=~+educa+rur+indig_censoP
         
          #Regressions
          gini_income~gini_reg+ha+gini_area
@@ -654,7 +652,7 @@ modindices(model1b_total_reg_fit, sort.=TRUE,minimum.value = 10)
 #Step 1: Model specification
 model1b_total_cult<-'#Structural model using inequality indicators        
          #Measurement models/defining latent variables,variables that cannot be directly measured
-         ha=~+educa+rur+indig
+         ha=~+educa+rur+indig_censoP
          
          #Regressions
          gini_income~gini_recreation_tot+ha+gini_area

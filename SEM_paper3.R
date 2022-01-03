@@ -188,12 +188,12 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
          #Measurement models/defining latent variables,variables that cannot be directly measured
          
           sup_prov=~productivity_water_sup+productivity_timber
-          ha=~+educa+indig_censoP+age+indiv+jurid+area
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
 
-        inc~ha+sup_prov
-        sup_prov~ha
+        inc~ha+sup_prov+area
+        sup_prov~ha+area
 #area~ha
         
         #New parameter (possible new indirect parameter if there are some)
@@ -234,11 +234,11 @@ model1a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
          #Measurement models/defining latent variables,variables that cannot be directly measured
 
           sup_reg=~productivity_water_regulation+productivity_cseq+productivity_cstor+productivity_erosion
-          ha=~+educa+indig_censoP+age+indiv+jurid+area
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         inc~sup_reg+ha
-         sup_reg~ha
+         inc~sup_reg+ha+area
+         sup_reg~ha+area
          
 
         #New parameter (possible new indirect parameter if there are some)
@@ -278,11 +278,11 @@ modindices(model1a_yield_reg_fit, sort.=TRUE,minimum.value = 10)
 model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
        #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable.          Only human agency(ha) is defined here as latent variable
-         ha=~+educa+indig_censoP+age+indiv+jurid+area
+         ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         inc~productivity_recreation+ha
-         productivity_recreation~ha
+         inc~productivity_recreation+ha+area
+         productivity_recreation~ha+area
          
         
         #New parameter (possible new indirect parameter if there are some)
@@ -325,11 +325,11 @@ model1a_total_prov<-'#Structural model using raw indicators - ES yield (provisio
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_prov=~tot_water_sup+tot_supl_timber
-          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regression
-         gini_income~tot_prov+ha
-         tot_prov~ha
+         inc~tot_prov+ha+area
+         tot_prov~ha+area
          
         
         #New parameter (possible new indirect parameter if there are some)
@@ -369,11 +369,11 @@ model1a_total_reg<-'#Structural model using raw indicators - ES yield (provision
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
-          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
+          ha=~+educa+indig_censoP+age+indiv+jurid 
 
          #Regressions
-         gini_income~tot_reg+ha
-         tot_reg~ha
+         inc~tot_reg+ha+area
+         tot_reg~ha+area
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -409,12 +409,14 @@ modindices(model1a_total_reg_fit, sort.=TRUE,minimum.value = 10)
 model1a_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable. Only human agency(ha) is defined here as latent variable
-        ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
+        ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         gini_income~tot_supl_recreation+ha
-         tot_supl_recreation~ha
-        
+         inc~tot_supl_recreation+ha+area
+          tot_supl_recreation~ha+area
+          
+          
+          
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
@@ -451,10 +453,10 @@ model1b_yield_prov<-'#Structural model using inequality indicators
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
            gini_prov=~gini_water_sup_prod+gini_timber_prod
-          ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         gini_income~gini_prov+ha
+         inc~gini_prov+ha+area
          gini_prov~ha
          gini_area~ha
     
@@ -573,11 +575,11 @@ modindices(model1b_yield_cult_fit, sort.=TRUE,minimum.value = 10)
 model1b_total_prov<-'#Structural model using inequality indicators  
          #Measurement models/defining latent variables,variables that cannot be directly measured       
            gini_tot=~gini_water_sup_tot+gini_timber_tot
-           ha=~+educa+indig_censoP+age+indiv_produc+soc_prod+area
+           ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         gini_income~gini_tot+ha
-         gini_tot~ha
+         gini_income~gini_tot+ha+area
+         gini_tot~ha+area
     
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -732,13 +734,13 @@ model2a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
          #Measurement models/defining latent variables,variables that cannot be directly measured
          
           sup_prov=~productivity_water_sup+productivity_timber
-          ha=~+educa+rur+indig
-
+          ha=~+educa+indig_censoP+age+indiv+jurid
+          
          #Regressions
 
          sup_prov~inc+ha+area
-         inc~ha
-         area~ha+inc
+         inc~ha+area
+         
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -779,21 +781,20 @@ model2a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
            #Measurement models/defining latent variables,variables that cannot be directly measured
          
           sup_reg=~productivity_water_sup+productivity_timber
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
 
          sup_reg~inc+ha+area
-         inc~ha
-         area~ha+inc
+         inc~ha+area
+         
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
-          rur~~varrur*rur#avoid variance of rurality to become negative
-          varrur>0
-          #gini_incomeome~~ha+area
+         # rur~~varrur*rur#avoid variance of rurality to become negative
+         # varrur>0
          
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         '
@@ -825,19 +826,18 @@ modindices(model2a_yield_reg_fit, sort.=TRUE,minimum.value = 10)
 model2a_yield_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
        #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable.          Only human agency(ha) is defined here as latent variable
-         ha=~+educa+rur+indig
+         ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
          productivity_recreation~inc+ha+area
-         area~ha+inc
-         inc~ha
+         inc~ha+area
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
-          rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
-          varrur>0
+         # rur~~varrur*rur#avoid variance of rurality to become negative. In some cases due to calculation probles the variances of some variables become slightly negative, which is bad, so you fix it to 0
+         #varrur>0
          
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
          
@@ -869,16 +869,15 @@ modindices(model2a_yield_cult_fit, sort.=TRUE,minimum.value = 10)
 
 #Step 1: Model specification
 
-model2a_total_prov<-'#Structural model using raw indicators - ES yield (provisioning ES)
+model2a_total_prov<-'#Structural model using raw indicators - total ES supply (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_prov=~tot_water_sup+tot_supl_timber
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regression
          tot_prov~inc+ha+area
-         inc~ha
-         area~ha+inc
+         inc~ha+area
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -914,16 +913,15 @@ modindices(model2a_total_prov_fit, sort.=TRUE,minimum.value = 10)
 
 
 ##model2a_total_reg##
-model2a_total_reg<-'#Structural model using raw indicators - ES yield (provisioning ES)
+model2a_total_reg<-'#Structural model using raw indicators - total ES supply (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
-          ha=~+educa+rur+indig
+          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
          tot_reg~inc+ha+area
-         inc~ha
-         area~ha+inc
+         inc~ha+area
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -961,13 +959,12 @@ modindices(model2a_total_reg_fit, sort.=TRUE,minimum.value = 10)
 model2a_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable. Only human agency(ha) is defined here as latent variable
-         ha=~+educa+rur+indig
+         ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         tot_supl_recreation~inc+tot_supl_recreation+ha+area
-         inc~ha
-         area~ha+inc
-        
+         tot_supl_recreation~inc+ha+area
+         inc~ha+area
+         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
@@ -1011,7 +1008,7 @@ write.xlsx(model2_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2
 
 
 model2_total<-cbind(dos_a_total_prov,dos_a_total_reg,dos_a_total_cult)
-colnames(model2_total)<-c("raw_prov","raw_reg", "raw_cult")
+colnames(model2_total)<c("provisioning","regulating", "cultural")
 model2_total<-format(round(model2_total,2),nsmall = 2)
 #model2_total<-as.data.frame(model2_total)
 model2_total<-as.data.frame(model2_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
@@ -1022,10 +1019,6 @@ write.xlsx(model2_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2
 
 
 
-
-##Model comparison: ANOVA
-
-anova(model1, model2)
 
 
 

@@ -693,29 +693,24 @@ modindices(model1b_total_cult_fit, sort.=TRUE,minimum.value = 10)
 
 ####results model 1####
 
-model1_yield<-cbind(uno_a_yield_prov,uno_b_yield_prov,uno_a_yield_reg,uno_b_yield_reg,uno_a_yield_cult,uno_b_yield_cult)
-colnames(model1_yield)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
+model1_yield<-cbind(uno_a_yield_prov,uno_a_yield_reg,uno_a_yield_cult)
+colnames(model1_yield)<-c("raw_prov","raw_reg", "raw_cult")
 model1_yield<-format(round(model1_yield,2),nsmall = 2)
-#model1_yield<-as.data.frame(model1_yield)
-model1_yield_gini_outcome<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+model1_yield<-as.data.frame(model1_yield)
+#model1_yield_gini_outcome<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
 #write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
-write.xlsx(model1_yield_gini_outcome, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield_gini_outcome.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 
 
 
 
-model1_total<-cbind(uno_a_total_prov,uno_b_total_prov,uno_a_total_reg,uno_b_total_reg,uno_a_total_cult,uno_b_total_cult)
-colnames(model1_total)<-c("raw_prov", "gini_prov","raw_reg","gini_reg", "raw_cult", "gini_cult")
+model1_total<-cbind(uno_a_total_prov,uno_a_total_reg,uno_a_total_cult)
+colnames(model1_total)<-c("raw_prov","raw_reg","raw_cult")
 model1_total<-format(round(model1_total,2),nsmall = 2)
-#model1_total<-as.data.frame(model1_total)
-model1_total_gini_outcome<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
+model1_total<-as.data.frame(model1_total)
+#model1_total_gini_outcome<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
 #write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
-write.xlsx(model1_total_gini_outcome, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total_gini_outcomed.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
-
-
-
-
-
+write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 
 
 

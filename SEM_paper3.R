@@ -21,6 +21,7 @@ library(corrplot)
 library(corrr)
 library(Hmisc)
 library(dplyr)
+library(xtable)
 
 
 ##Import database
@@ -34,7 +35,7 @@ data.table(colnames(db_short))#get order of columns in the dataframe
 
 #Generating subset of variables to be used and new working dataframe named"db"
 
-ha<-db_short[c("Prod_indiv","pers_jurid","indig_area", "prof_ed_univ","age" )]##human agency
+ha<-db_short[c("Prod_indiv","pers_jurid","indig_area","P_INDIG" ,"prof_ed_univ","age" )]##human agency
 tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]##variables of total supply (all supply within the limits of each municipality)
 product<-db_short[c("productivity_water_sup","productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber", "productivity_recreation")]##productivity or yield variables (mean yield per ha)
 ginis<-db_short[c("gini_water_sup_prod", "gini_water_sup_tot","gini_water_reg_prod","gini_water_reg_tot","gini_cseq_prod","gini_cseq_tot","gini_cstor_prod","gini_cstor_tot","gini_erosion_prod","gini_erosion_tot","gini_timber_prod","gini_timber_tot","gini_recreation_prod", "gini_recreation_tot")]##Gini coefficients of ES supply variables
@@ -43,7 +44,7 @@ area<-db_short[c("area_promedio_predios", "gini_land")]##mean area  of all the p
 data.table(colnames(db_short))#check order of columns
 
 db<-data.frame(ha,income,area, product,tot_sup,ginis)#
-colnames(db)[c(1:9)]<-c("indiv","jurid","indig","educa","age","inc","gini_income", "area", "gini_area")
+colnames(db)[c(1:10)]<-c("indiv","jurid","indig_censoA", "indig_censoP","educa","age","inc","gini_income", "area", "gini_area")
 data.table(colnames(db))
 
 sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
@@ -135,9 +136,41 @@ for (i in 1:37) {
   hist(dbn[,c(1:37)][,i],main=names(dbn [,c(1:37)])[i],xlab=names(dbn [,c(1:37)])[i])
 }
  
-#check correlations between measurable variables of human agency
-cor_datos<-cor(dbn[,1:3], use="pairwise.complete.obs", method="spearman")
-cor_matrix<-rcorr(as.matrix(dbn[,1:3]))
+#check correlations between all measurement variables (exogenous variables)
+
+db_cor<-db[c("indiv","jurid","indig_censoP","educa","age","inc","area", "productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber","productivity_recreation","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]#extract only variables to be visualized in correlations
+
+colnames(db_cor)<-c("indiv","leg","indig","educa","age","inc","area","yield_w_reg","yield_cseq","yield_cs","yield_ero","yield_timber","yield_recre","tot_w_sup","tot_w_reg","tot_cseq","tot_cstor","tot_erosion","tot_timber","tot_recre")#change to shorter names for better display in correlation matrix
+
+cor_datos<-round(cor(db[c("indiv","jurid","indig_censoP","educa","age","inc","area", "productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber","productivity_recreation","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")], use="pairwise.complete.obs", method="spearman"), 2)
+str(cor_datos)
+
+
+##con HMSIC##
+cor_matrix<-rcorr(as.matrix(db_cor))#con corrr produce valores r y P
+
+
+flattenCorrMatrix <- function(cormat, pmat) {
+  ut <- upper.tri(cormat)
+  data.frame(
+    row = rownames(cormat)[row(cormat)[ut]],
+    column = rownames(cormat)[col(cormat)[ut]],
+    cor  =(cormat)[ut],
+    p = pmat[ut]
+  )
+}
+matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizar matriz plana
+
+
+corrplot(cor_matrix$r,  type="lower", method = "square", order="original", pch.cex = 0.8, pch.col="black",
+         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig")#con corrplop, necesita valores r y P de corrr
+
+
+write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##
+
+#cor_matrix<-rcorr(as.matrix(dbn[c(1:16)]))
+
+
 
 #to check variable order again
 data.table(colnames(dbn))

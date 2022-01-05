@@ -7,9 +7,10 @@
 
 ##Libraries##
 
-#install.packages(c("lavaan","semPlot","corrplot","matrixcalc" ))
+#install.packages(c("lavaan","semPlot","corrplot", "semTable" ))
 library(lavaan)
 library(semPlot)
+library(semTable)
 library(matrixcalc)
 library(corrplot)
 library(openxlsx)
@@ -697,23 +698,21 @@ model1_yield<-cbind(uno_a_yield_prov,uno_a_yield_reg,uno_a_yield_cult)
 colnames(model1_yield)<-c("raw_prov","raw_reg", "raw_cult")
 model1_yield<-format(round(model1_yield,2),nsmall = 2)
 model1_yield<-as.data.frame(model1_yield)
-#model1_yield_gini_outcome<-as.data.frame(model1_yield)#I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
-#write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 write.xlsx(model1_yield, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_yield.xlsx", row.names=TRUE,overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
-
-
 
 
 model1_total<-cbind(uno_a_total_prov,uno_a_total_reg,uno_a_total_cult)
 colnames(model1_total)<-c("raw_prov","raw_reg","raw_cult")
 model1_total<-format(round(model1_total,2),nsmall = 2)
 model1_total<-as.data.frame(model1_total)
-#model1_total_gini_outcome<-as.data.frame(model1_total)###I added "_not_normalized" to check how results look like without the normalization process as Rachel recommended. This line need to run if we're usinng the non-normalized data
-#write.xlsx(model1_total_not_normalized, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders
 write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
 
+#with semTable
+list_model1_yield<-list(model1a_yield_prov_fit,model1a_yield_reg_fit,model1a_yield_cult_fit)#original model fits
 
-
+sem_tabla<-semTable(list_model1_yield, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")
+fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/fit_indicators", fitmeas = c("chisq", "df", "pvalue", "rmsea",
+"cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
 
 
 #####Model 2: Regression model with "ES supply inequality" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural service.####
@@ -754,6 +753,7 @@ model2a_yield_prov_fit<-sem(model2a_yield_prov, data=dbn, meanstructure=FALSE, e
 summary(model2a_yield_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_yield_prov<-fitMeasures(model2a_yield_prov_fit, c("cfi","rmsea","srmr", "pvalue"))
 inspect(model2a_yield_prov_fit,"r2")
+inspect(model2a_yield_prov_fit,"vcov")
 
 #Residuals
 resid(model2a_yield_prov_fit)

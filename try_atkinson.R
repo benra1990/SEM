@@ -1,237 +1,20 @@
-##Structural equation model (SEM) paper 3 with lavaan##
-#Maria and Rachel->Please check the script and see if it makes sence, I have developed the models following the discussion we had last week.
-#Let me know if you have trouble installing github/Rstudio connection.
-#Remember to always pull before commiting and pushing! In this way you first incorporate changes that others have done and then you incorporate your changes into the repository.
-#Select a root folder in your computer that you're sure you wont delete by accident, if you delete it being connected to the cloud repository everyone looses everything! I will anyhow make regular copies of our progress.
-
-
-##Libraries##
-
-#install.packages(c("lavaan","semPlot","corrplot", "semTable" ))
-library(lavaan)
-library(semPlot)
-library(semTable)
-library(matrixcalc)
-library(corrplot)
-library(openxlsx)
-library(data.table)
-#install.packages("bestNormalize")
-library(bestNormalize)
-library(corrplot)
-#install.packages("corrr")
-library(corrr)
-library(Hmisc)
-library(dplyr)
-library(xtable)
-
-
-##Import database
-db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# this will change depending on where you have it on your computers!
-str(db_short)#check structure
-data.table(colnames(db_short))#get order of columns in the dataframe
-
-
-#hypothesis: land size inequality and human agency mediate the relationship between ES yield and income. We will test two models, number 1 were income is the outcome variable 
-#and one were ES supply inequality is the outcome variable.
-
-#Generating subset of variables to be used and new working dataframe named"db"
-
-ha<-db_short[c("Prod_indiv","pers_jurid","indig_area","P_INDIG" ,"prof_ed_univ","age" )]##human agency
-tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]##variables of total supply (all supply within the limits of each municipality)
-product<-db_short[c("productivity_water_sup","productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber", "productivity_recreation")]##productivity or yield variables (mean yield per ha)
-ginis<-db_short[c("gini_water_sup_prod", "gini_water_sup_tot","gini_water_reg_prod","gini_water_reg_tot","gini_cseq_prod","gini_cseq_tot","gini_cstor_prod","gini_cstor_tot","gini_erosion_prod","gini_erosion_tot","gini_timber_prod","gini_timber_tot","gini_recreation_prod", "gini_recreation_tot")]##Gini coefficients of ES supply variables
-atkinson<-db_short[c("Atkinson_water_sup_prod", "Atkinson_water_sup_tot","Atkinson_water_reg_prod","Atkinson_water_reg_tot","gini_cseq_prod","gini_cseq_tot","Atkinson_cstor_prod","Atkinson_cstor_tot","Atkinson_erosion_prod","Atkinson_erosion_tot","Atkinson_timber_prod","Atkinson_timber_tot","Atkinson_recreation_prod", "Atkinson_recreation_tot")]#the onyl gini here is cseq because for negative values there is only a method for Gini
-
-income<-db_short[c("weighted_mean_income","weighted_gini_income")]##mean income & gini income (data chile)
-area<-db_short[c("area_promedio_predios", "gini_land", "atk_area")]##mean area  of all the properties within a municipality
-data.table(colnames(db_short))#check order of columns
-
-db<-data.frame(ha,income,area, product,tot_sup,atkinson)#
-colnames(db)[c(1:10)]<-c("indiv","jurid","indig_censoA", "indig_censoP","educa","age","inc","gini_income", "area", "gini_area")
-data.table(colnames(db))
-
-sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
-
-#Check the data and transform when needed (scale and normalize)
-
-unlist(lapply(db,is.numeric))##tells you which columns are numeric
-
-for (i in 1:length(db))  { ##transform all variables to numeric
-  db[,i] <- as.numeric (db[,i])
-}
-
-#Histograms for all variables
-#windows()
-par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:37) {
-  hist(db[,c(1:37)][,i],main=names(db [,c(1:37)])[i],xlab=names(db[,c(1:37)])[i])
-}
-#dev.off()
-#check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
-#yield/productivity
-bestNormalize(db$productivity_water_sup)
-bestNormalize(db$productivity_water_regulation)
-bestNormalize(db$productivity_cseq)
-bestNormalize(db$productivity_cstor)
-bestNormalize(db$productivity_erosion)
-bestNormalize(db$productivity_timber)
-bestNormalize(db$productivity_recreation)
-
-#total supply
-bestNormalize(db$tot_water_sup)
-bestNormalize(db$tot_water_regulation)
-bestNormalize(db$tot_supl_cseq)
-bestNormalize(db$tot_supl_cstor)
-bestNormalize(db$tot_supl_erosion)
-bestNormalize(db$tot_supl_timber)
-bestNormalize(db$tot_supl_recreation)
-
-#human agency
-#bestNormalize(db$pov_persons)
-#bestNormalize(db$pov_percentage)
-#bestNormalize(db$rur)
-bestNormalize(db$indig_censoP)
-bestNormalize(db$educa)
-#bestNormalize(db$tot_pop)
-#bestNormalize(db$dist_cities)
-bestNormalize(db$indiv)
-bestNormalize(db$jurid)
-bestNormalize(db$age)
-bestNormalize(db$area)
-bestNormalize(db$atk_area)
-
-#ES supply inequality (Atkinson)
-#yield
-bestNormalize(db$Atkinson_water_sup_prod)
-bestNormalize(db$Atkinson_water_reg_prod)
-bestNormalize(db$Atkinson_cstor_prod)
-bestNormalize(db$gini_cseq_prod)#gini is used here because atkinson cannot be calculated for negative values
-bestNormalize(db$Atkinson_erosion_prod)
-bestNormalize(db$Atkinson_recreation_prod)
-bestNormalize(db$Atkinson_timber_prod)
-#total
-bestNormalize(db$Atkinson_water_sup_tot)
-bestNormalize(db$Atkinson_water_reg_tot)
-bestNormalize(db$Atkinson_cstor_tot)
-bestNormalize(db$gini_cseq_tot)#gini is used here because atkinson cannot be calculated for negative values
-bestNormalize(db$Atkinson_erosion_tot)
-bestNormalize(db$Atkinson_recreation_tot)
-bestNormalize(db$Atkinson_timber_tot)              
-                
-#income
-bestNormalize(db$inc)
-bestNormalize(db$atk_income)
-
-       
-# Transform ecosystem service variables to try to meet normality.
-db%>%dplyr::mutate(productivity_water_sup=predict(bestNormalize::sqrt_x(productivity_water_sup+1)),
-               productivity_water_regulation=predict(bestNormalize::orderNorm         (productivity_water_regulation)),
-                  productivity_cseq=predict(bestNormalize::orderNorm (productivity_cseq)),      productivity_cstor=predict(bestNormalize::sqrt_x(productivity_cstor+1)),
-                        productivity_erosion=predict(bestNormalize::orderNorm(productivity_erosion)),
-                        productivity_timber=predict(bestNormalize::orderNorm(productivity_timber)),
-                        productivity_recreation=predict(bestNormalize::orderNorm(productivity_recreation)),
-                       tot_water_sup=predict(arcsinh_x(productivity_water_sup)),
-                        tot_water_regulation=predict(log_x(tot_water_regulation+1)),
-                       tot_supl_cseq=predict(arcsinh_x(tot_supl_cseq)),           
-                       tot_supl_cstor=predict(yeojohnson(tot_supl_cstor)),
-                       tot_supl_erosion=predict(arcsinh_x(tot_supl_erosion)),
-                       tot_supl_timber=predict(yeojohnson(tot_supl_timber)),
-                        tot_supl_recreation=predict(bestNormalize::boxcox(tot_supl_recreation)),
-                        #human agency
-                         area=predict(bestNormalize::boxcox(area)),
-                          atk_area=predict(bestNormalize::arcsinh_x(atk_area)),
-                         indig_censoP=predict (bestNormalize::orderNorm(indig_censoP)),   
-                          educa=predict (bestNormalize::orderNorm(educa)), 
-                           indiv=predict(bestNormalize::orderNorm(indiv)),
-                            jurid=predict(bestNormalize::yeojohnson(jurid)),
-                             age=predict(bestNormalize::orderNorm(age)),
-                          #income
-                          inc=predict (bestNormalize::boxcox(inc)),
-                           #atkinson coeff.
-                            #yield
-               Atkinson_water_sup_prod=predict(bestNormalize::log_x(Atkinson_water_sup_prod)),
-               Atkinson_water_reg_prod=predict(bestNormalize::center_scale(Atkinson_water_reg_prod)),
-               Atkinson_cstor_prod=predict(bestNormalize::log_x(Atkinson_cstor_prod+1)),
-               gini_cseq_prod=predict(bestNormalize::orderNorm(gini_cseq_prod)),
-               Atkinson_erosion_prod=predict(bestNormalize::yeojohnson(Atkinson_erosion_prod)),
-               Atkinson_recreation_prod=predict(bestNormalize::orderNorm(Atkinson_recreation_prod)),
-               Atkinson_timber_prod=predict(bestNormalize::orderNorm(Atkinson_timber_prod)),
-                             #total
-               Atkinson_water_sup_tot=predict(bestNormalize::sqrt_x(Atkinson_water_sup_tot)),
-               Atkinson_water_reg_tot=predict(bestNormalize::orderNorm(Atkinson_water_reg_tot)),
-               Atkinson_cstor_tot=predict(bestNormalize::center_scale(Atkinson_cstor_tot)),
-               gini_cseq_tot=predict(bestNormalize::yeojohnson(gini_cseq_tot)),
-               Atkinson_erosion_tot=predict(bestNormalize::orderNorm(Atkinson_erosion_tot)),
-               Atkinson_recreation_tot=predict(bestNormalize::log_x(Atkinson_recreation_tot+1)),
-               Atkinson_timber_tot=predict(bestNormalize::arcsinh_x(Atkinson_timber_tot)),    
-                        
-)->dbn#new data base with normalized variables is "dbn"
-
-dbn<-lapply(dbn[,c(1:39)], scales::rescale)#rescaling data 0 to 1# This is done with "db" database to check for the recommendation of Rachel of looking at how results look like without normalizing the data. If you want to use normalized data change for dbn. Results show no changes in the results when using one or another database.
-dbn<-as.data.frame(dbn)# transforming to dataframe again
-
-#new histogram
-
-par(mfrow= c (5,7),mar=c(1,2,2,0.5))     
-for (i in 1:38) {
-  hist(dbn[,c(1:38)][,i],main=names(dbn [,c(1:38)])[i],xlab=names(dbn [,c(1:38)])[i])
-}
- 
-#check correlations between all measurement variables (exogenous variables)
-
-db_cor<-db[c("indiv","jurid","indig_censoP","educa","age","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]#extract only variables to be visualized in correlations"productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber","productivity_recreation
-
-colnames(db_cor)<-c("indiv","leg","indig","educa","age","inc","area","tot_w_sup","tot_w_reg","tot_cseq","tot_cstor","tot_erosion","tot_timber","tot_recre")#change to shorter names for better display in correlation matrix"yield_w_reg","yield_cseq","yield_cs","yield_ero","yield_timber","yield_recre"
-
-cor_datos<-round(cor(db[c("indiv","jurid","indig_censoP","educa","age","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")], use="pairwise.complete.obs", method="spearman"), 2)
-str(cor_datos)
-
-
-##con HMSIC##
-cor_matrix<-rcorr(as.matrix(db_cor))#con corrr produce valores r y P
-
-
-flattenCorrMatrix <- function(cormat, pmat) {
-  ut <- upper.tri(cormat)
-  data.frame(
-    row = rownames(cormat)[row(cormat)[ut]],
-    column = rownames(cormat)[col(cormat)[ut]],
-    cor  =(cormat)[ut],
-    p = pmat[ut]
-  )
-}
-matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizar matriz plana
-
-
-corrplot(cor_matrix$r,  type="lower", method = "square", order="original", pch.cex = 0.8, pch.col="black",
-         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig")#con corrplop, necesita valores r y P de corrr
-
-
-write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##
-
-#cor_matrix<-rcorr(as.matrix(dbn[c(1:16)]))
-
-
-#to check variable order again
-data.table(colnames(dbn))
-
 ####Model 1: Regression model with "income" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural services####
-  
+
 
 ####Model 1a (yield)####
 #Step 1: Model specification
- 
+
 model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
          
-          sup_prov=~productivity_water_sup+productivity_timber
+          sup_prov=~Atkinson_water_sup_prod+Atkinson_timber_prod
           ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
 
-        gini_income~ha+sup_prov+area
-        sup_prov~ha+area
+        inc~ha+sup_prov+atk_area
+        sup_prov~ha+atk_area
 #area~ha
         
         #New parameter (possible new indirect parameter if there are some)
@@ -244,14 +27,14 @@ model1a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
       
 '
 #Step 2: Model estimation
- 
+
 model1a_yield_prov_fit<-sem(model1a_yield_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
 
 #Step 3: Evaluate the model
 summary(model1a_yield_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_yield_prov<-fitMeasures(model1a_yield_prov_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_yield_prov<-fitMeasures(model1a_yield_prov_fit, c("cfi","rmsea","srmr", "pvalue"))
 inspect(model1a_yield_prov_fit,"r2")
-       
+
 #Residuals
 resid(model1a_yield_prov_fit)
 
@@ -275,7 +58,7 @@ model1a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
           ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         inc~sup_reg+ha+atk_area
+         gini_income~sup_reg+ha+atk_area
          sup_reg~ha+atk_area
          
 
@@ -295,7 +78,7 @@ model1a_yield_reg_fit<-sem(model1a_yield_reg, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model1a_yield_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-       
+
 #summary(model1a_yield_fit, fit.measures=TRUE)
 uno_a_yield_reg<-fitMeasures(model1a_yield_reg_fit, c("cfi","rmsea","srmr", "pvalue"))
 
@@ -319,8 +102,8 @@ model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         inc~productivity_recreation+ha+area
-         productivity_recreation~ha+area
+         inc~productivity_recreation+ha+Atk
+         productivity_recreation~ha+Atk
          
         
         #New parameter (possible new indirect parameter if there are some)
@@ -333,7 +116,7 @@ model1a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
          #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
          
          '
-        
+
 
 #Step 2: Model estimation
 model1a_yield_cult_fit<-sem(model1a_yield_cult, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
@@ -411,8 +194,8 @@ model1a_total_reg<-'#Structural model using raw indicators - ES yield (provision
           ha=~+educa+indig_censoP+age+indiv+jurid 
 
          #Regressions
-         inc~tot_reg+ha+area
-         tot_reg~ha+area
+         inc~tot_reg+ha+Atk
+         tot_reg~ha+Atk
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -451,8 +234,8 @@ model1a_total_cult<-'#Structural model using raw indicators - ES yield (provisio
         ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         inc~tot_supl_recreation+ha+area
-          tot_supl_recreation~ha+area
+         inc~tot_supl_recreation+ha+Atk
+          tot_supl_recreation~ha+Atk
           
           
           
@@ -750,7 +533,7 @@ list_model1_yield<-list(model1a_yield_prov_fit,model1a_yield_reg_fit,model1a_yie
 
 sem_tabla<-semTable(list_model1_yield, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")
 fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/fit_indicators", fitmeas = c("chisq", "df", "pvalue", "rmsea",
-"cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
+                                                                                                                                    "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
 
 
 #####Model 2: Regression model with "ES supply inequality" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural service.####
@@ -770,8 +553,8 @@ model2a_yield_prov<-'#Structural model using raw indicators - ES yield (provisio
           
          #Regressions
 
-         sup_prov~inc+ha+area
-         inc~ha+area
+         sup_prov~inc+ha+Atk
+         inc~ha+Atk
          
         
         #New parameter (possible new indirect parameter if there are some)
@@ -818,8 +601,8 @@ model2a_yield_reg<-'#Structural model using raw indicators - ES yield (provision
 
          #Regressions
 
-         sup_reg~inc+ha+area
-         inc~ha+area
+         sup_reg~inc+ha+Atk
+         inc~ha+Atk
          
 
         #New parameter (possible new indirect parameter if there are some)
@@ -862,9 +645,9 @@ model2a_yield_cult<-'#Structural model using raw indicators - ES yield (provisio
          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         productivity_recreation~inc+ha+area
-         inc~ha+area
-        
+         productivity_recreation~inc+ha+Atk
+         inc~ha+Atk
+      
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
 
@@ -909,8 +692,8 @@ model2a_total_prov<-'#Structural model using raw indicators - total ES supply (p
           ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regression
-         tot_prov~inc+ha+area
-         inc~ha+area
+         tot_prov~inc+ha+Atk
+         inc~ha+Atk
         
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -953,8 +736,8 @@ model2a_total_reg<-'#Structural model using raw indicators - total ES supply (pr
           ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         tot_reg~inc+ha+area
-         inc~ha+area
+         tot_reg~inc+ha+Atk
+         inc~ha+Atk
 
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect
@@ -995,8 +778,8 @@ model2a_total_cult<-'#Structural model using raw indicators - ES yield (provisio
          ha=~+educa+indig_censoP+age+indiv+jurid
 
          #Regressions
-         tot_supl_recreation~inc+ha+area
-         inc~ha+area
+         tot_supl_recreation~inc+ha+Atk
+         inc~ha+Atk
          
         #New parameter (possible new indirect parameter if there are some)
            #g_sup:=ha*area#indirect effect

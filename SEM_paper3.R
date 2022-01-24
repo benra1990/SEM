@@ -67,7 +67,7 @@ dev.off()
 
 db_cor<-db[c("indiv","jurid","indig_censoP","educa","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]#extract only variables to be visualized in correlations"productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber","productivity_recreation
 
-colnames(db_cor)<-c("individual person tenure","legal person tenure","indigenous population","university education","income","proeprty area","water supply","water regulation","carbon sequestration","carbon storage","sediment retention","native timber","recreation")#change to shorter names for better display in correlation matrix"yield_w_reg","yield_cseq","yield_cs","yield_ero","yield_timber","yield_recre"
+colnames(db_cor)<-c("individual person tenure","legal person tenure","indigenous population","university education","income","property area","water supply","water regulation","carbon sequestration","carbon storage","sediment retention","native timber","recreation")#change to shorter names for better display in correlation matrix"yield_w_reg","yield_cseq","yield_cs","yield_ero","yield_timber","yield_recre"
 
 cor_datos<-round(cor(db[c("indiv","jurid","indig_censoP","educa","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")], use="pairwise.complete.obs", method="spearman"), 2)
 str(cor_datos)
@@ -90,7 +90,7 @@ matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizar matriz p
 
 
 corrplot(cor_matrix$r,  type="lower", method = "square", order="original", pch.cex = 0.8, pch.col="black",
-         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig")#con corrplop, necesita valores r y P de corrr
+         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", diag=FALSE)#con corrplop, necesita valores r y P de corrr
 
 
 write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##

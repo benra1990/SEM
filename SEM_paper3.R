@@ -188,7 +188,7 @@ model1_total_prov_fit<-sem(model1_total_prov, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model1_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 #varianace of cstor negative, fix it to 0
 
 #Residuals
@@ -196,10 +196,10 @@ resid(model1_total_prov_fit)
 
 #Model-implied covariance matrix
 fitted(model1_total_prov_fit)
-parameterEstimates(model1_total_prov_fit)#gives the currently use parameters of the model fit
+parameterEstimates(model1_total_prov_fit, ci=FALSE, rsquare=TRUE, standardized=TRUE)#gives the currently used parameters of the model fit
 
 #Step 4: VIsualize the path model
-semPlot::semPaths(model1_total_prov_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
+semPlot::semPaths(model1_total_prov_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
 
 #Modification of indices
 modindices(model1_total_prov_fit, sort.=TRUE,minimum.value = 10)
@@ -227,7 +227,7 @@ model1_total_reg_fit<-sem(model1_total_reg, data=dbn, meanstructure=FALSE, estim
 
 #Step 3: Evaluate the model
 summary(model1_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 
 #Residuals
 resid(model1_total_reg_fit)
@@ -267,7 +267,7 @@ model1_total_cult_fit<-sem(model1_total_cult, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model1_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 
 #Residuals
 resid(model1_total_cult_fit)
@@ -298,9 +298,9 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
 
 #explanatory power of models# this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
 #with semTable
-list_model1_yield<-list(model1a_yield_prov_fit,model1a_yield_reg_fit,model1a_yield_cult_fit)#original model fits
+list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit,model1_total_cult_fit)#original model fits
 
-sem_tabla<-semTable(list_model1_yield, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")
+sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")#change location to see table
 
 
 
@@ -335,7 +335,7 @@ model2_total_prov_fit<-sem(model2_total_prov, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model2_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-dos_a_total_prov<-fitMeasures(model2_total_prov_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+dos_a_total_prov<-fitMeasures(model2_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 
 #Residuals
 resid(model2_total_prov_fit)
@@ -373,7 +373,7 @@ model2_total_reg_fit<-sem(model2_total_reg, data=dbn, meanstructure=FALSE, estim
 
 #Step 3: Evaluate the model
 summary(model2_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-dos_a_total_reg<-fitMeasures(model2_total_reg_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+dos_a_total_reg<-fitMeasures(model2_total_reg_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 
 #set variance of Cstor to 0
 
@@ -412,7 +412,7 @@ model2_total_cult_fit<-sem(model2_total_cult, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model2_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-dos_a_total_cult<-fitMeasures(model2_total_cult_fit, c("cfi","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+dos_a_total_cult<-fitMeasures(model2_total_cult_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 
 #Residuals
 resid(model2_total_cult_fit)
@@ -445,9 +445,9 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
 #this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
 
 #with semTable
-list_model1_yield<-list(model1a_yield_prov_fit,model1a_yield_reg_fit,model1a_yield_cult_fit)#original model fits
+list_model2_total<-list(model2_total_prov_fit,model2_total_reg_fit,model2_total_cult_fit)#original model fits
 
-sem_tabla<-semTable(list_model1_yield, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")
+sem_tabla<-semTable(list_model2_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")#change location to see table
 
 #END#
 

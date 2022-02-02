@@ -302,7 +302,7 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
 #explanatory power of models# this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
 #with standardizedsolution function
 std_total1<-rbind(std_prov1,std_reg1,std_cult1)
-write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
+write.xlsx(std_total1, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
 
 #with semTable
 list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit)#,model1_total_cult_fit)#original model fits
@@ -455,7 +455,7 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
 #this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
 #with standardizedsolution function
 std_total2<-rbind(std_prov2,std_reg2,std_cult2 )
-write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total2.xlsx", row.names=TRUE, overwrite=TRUE)
+write.xlsx(std_total2, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total2.xlsx", row.names=TRUE, overwrite=TRUE)
 
 #with semTable
 list_model2_total<-list(model2_total_prov_fit,model2_total_reg_fit)#,model2_total_cult_fit)#original model fits

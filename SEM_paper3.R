@@ -188,7 +188,8 @@ model1_total_prov_fit<-sem(model1_total_prov, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model1_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+std_prov1<-standardizedSolution(model1_total_prov_fit)#standardized values for latent variables, regressions and covariances
 #varianace of cstor negative, fix it to 0
 
 #Residuals
@@ -227,7 +228,8 @@ model1_total_reg_fit<-sem(model1_total_reg, data=dbn, meanstructure=FALSE, estim
 
 #Step 3: Evaluate the model
 summary(model1_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+std_reg1<-standardizedSolution(model1_total_reg_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
 resid(model1_total_reg_fit)
@@ -267,7 +269,8 @@ model1_total_cult_fit<-sem(model1_total_cult, data=dbn, meanstructure=FALSE, est
 
 #Step 3: Evaluate the model
 summary(model1_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+std_cult1<-standardizedSolution(model1_total_reg_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
 resid(model1_total_cult_fit)
@@ -297,10 +300,14 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
                                                                                                                                     "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
 
 #explanatory power of models# this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
-#with semTable
-list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit,model1_total_cult_fit)#original model fits
+#with standardizedsolution function
+std_total1<-rbind(std_prov1,std_reg1,std_cult1)
+write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
 
-sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")#change location to see table
+#with semTable
+list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit)#,model1_total_cult_fit)#original model fits
+
+sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model1", paramSets="all",type="html")#change location to see table
 
 
 
@@ -336,6 +343,7 @@ model2_total_prov_fit<-sem(model2_total_prov, data=dbn, meanstructure=FALSE, est
 #Step 3: Evaluate the model
 summary(model2_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_prov<-fitMeasures(model2_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+std_prov2<-standardizedSolution(model2_total_prov_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
 resid(model2_total_prov_fit)
@@ -374,6 +382,7 @@ model2_total_reg_fit<-sem(model2_total_reg, data=dbn, meanstructure=FALSE, estim
 #Step 3: Evaluate the model
 summary(model2_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_reg<-fitMeasures(model2_total_reg_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+std_reg2<-standardizedSolution(model2_total_reg_fit)#standardized values for latent variables, regressions and covariances
 
 #set variance of Cstor to 0
 
@@ -413,6 +422,7 @@ model2_total_cult_fit<-sem(model2_total_cult, data=dbn, meanstructure=FALSE, est
 #Step 3: Evaluate the model
 summary(model2_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_cult<-fitMeasures(model2_total_cult_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
+std_cult2<-standardizedSolution(model2_total_cult_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
 resid(model2_total_cult_fit)
@@ -443,11 +453,14 @@ fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spati
 
 #explanatory power of models# 
 #this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
+#with standardizedsolution function
+std_total2<-rbind(std_prov2,std_reg2,std_cult2 )
+write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total2.xlsx", row.names=TRUE, overwrite=TRUE)
 
 #with semTable
-list_model2_total<-list(model2_total_prov_fit,model2_total_reg_fit,model2_total_cult_fit)#original model fits
+list_model2_total<-list(model2_total_prov_fit,model2_total_reg_fit)#,model2_total_cult_fit)#original model fits
 
-sem_tabla<-semTable(list_model2_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla", paramSets="all",type="html")#change location to see table
+sem_tabla<-semTable(list_model2_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model2", paramSets="all",type="html")#change location to see table
 
 #END#
 

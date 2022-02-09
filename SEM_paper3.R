@@ -270,7 +270,7 @@ model1_total_cult_fit<-sem(model1_total_cult, data=dbn, meanstructure=FALSE, est
 #Step 3: Evaluate the model
 summary(model1_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
-std_cult1<-standardizedSolution(model1_total_reg_fit)#standardized values for latent variables, regressions and covariances
+std_cult1<-standardizedSolution(model1_total_cult_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
 resid(model1_total_cult_fit)
@@ -344,6 +344,7 @@ model2_total_prov_fit<-sem(model2_total_prov, data=dbn, meanstructure=FALSE, est
 summary(model2_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_prov<-fitMeasures(model2_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 std_prov2<-standardizedSolution(model2_total_prov_fit)#standardized values for latent variables, regressions and covariances
+inspect(model2_total_prov_fit,what="std")$lambda
 
 #Residuals
 resid(model2_total_prov_fit)
@@ -383,6 +384,7 @@ model2_total_reg_fit<-sem(model2_total_reg, data=dbn, meanstructure=FALSE, estim
 summary(model2_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_reg<-fitMeasures(model2_total_reg_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 std_reg2<-standardizedSolution(model2_total_reg_fit)#standardized values for latent variables, regressions and covariances
+inspect(model2_total_prov_fit,what="std")$lambda#gives factor loadings
 
 #set variance of Cstor to 0
 
@@ -422,7 +424,10 @@ model2_total_cult_fit<-sem(model2_total_cult, data=dbn, meanstructure=FALSE, est
 #Step 3: Evaluate the model
 summary(model2_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_cult<-fitMeasures(model2_total_cult_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
-std_cult2<-standardizedSolution(model2_total_cult_fit)#standardized values for latent variables, regressions and covariances
+std_cult2<-standardizedSolution(model2_total_cult_fit,type = c("std.all"))#standardized values for latent variables, regressions and covariances
+
+inspect(model2_total_prov_fit,what="std")$lambda#gives factor loadings
+
 
 #Residuals
 resid(model2_total_cult_fit)

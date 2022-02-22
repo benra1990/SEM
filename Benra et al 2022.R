@@ -31,6 +31,9 @@ tot_sup<- db_short[c("tot_water_sup","tot_water_regulation","tot_supl_cseq","tot
 income<-db_short[c("weighted_mean_income")]##mean income & gini income (data chile)
 area<-db_short[c("area_promedio_predios")]##mean area  of all the properties within a municipality
 
+
+###db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# this will change depending on where you have it on your computers!###aqui link to db
+
 db<-data.frame(ha,income,area, tot_sup)#
 data.table(colnames(db))#check order of columns
 colnames(db)[c(1:6)]<-c("indiv","jurid", "indig_censoP","educa","inc", "area")
@@ -54,18 +57,21 @@ for (i in 1:13) {
 }
 dev.off()
 
-#check correlations between all measurement variables (exogenous variables)
+#check correlations between all variables of model group 1 and 2
 
-db_cor<-db[c("indiv","jurid","indig_censoP","educa","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]#extract only variables to be visualized in correlations"productivity_water_regulation","productivity_cseq","productivity_cstor","productivity_erosion","productivity_timber","productivity_recreation
+db_cor<-db[c("indiv","jurid","indig_censoP","educa","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")]
 
-colnames(db_cor)<-c("individual person tenure","legal person tenure","indigenous population","university education","income","property area","water supply","water regulation","carbon sequestration","carbon storage","sediment retention","native timber","recreation")#change to shorter names for better display in correlation matrix"yield_w_reg","yield_cseq","yield_cs","yield_ero","yield_timber","yield_recre"
+colnames(db_cor)<-c("individual person tenure","legal person tenure","indigenous population","university education","income","property area","water supply","water regulation","carbon sequestration","carbon storage","sediment retention","native timber","recreation")#change to shorter names for better display in correlation matrix
 
 cor_datos<-round(cor(db[c("indiv","jurid","indig_censoP","educa","inc","area","tot_water_sup","tot_water_regulation", "tot_supl_cseq","tot_supl_cstor","tot_supl_erosion","tot_supl_timber","tot_supl_recreation")], use="pairwise.complete.obs", method="spearman"), 2)
+
 str(cor_datos)
 
+write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##save correlation matrix
 
-##con HMSIC##
-cor_matrix<-rcorr(as.matrix(db_cor))#con corrr produce valores r y P
+
+##alternative calculation with HMSIC package##
+cor_matrix<-rcorr(as.matrix(db_cor))#corrr package produces r & P values
 
 
 flattenCorrMatrix <- function(cormat, pmat) {
@@ -77,14 +83,12 @@ flattenCorrMatrix <- function(cormat, pmat) {
     p = pmat[ut]
   )
 }
-matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizar matriz plana
+matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizing matriz plana
 
 
 corrplot(cor_matrix$r,  type="lower", method = "square", order="original", pch.cex = 0.8, pch.col="black",
-         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", diag=FALSE)#con corrplop, necesita valores r y P de corrr
+         p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", diag=FALSE)#here you use above calculated r y P values
 
-
-write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##
 
 
 #check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
@@ -103,7 +107,7 @@ bestNormalize(db$indig_censoP)
 bestNormalize(db$educa)
 bestNormalize(db$indiv)
 bestNormalize(db$jurid)
-  
+
 #Land endowment
 bestNormalize(db$area)
 #income
@@ -111,22 +115,22 @@ bestNormalize(db$inc)
 
 # Transform ecosystem service variables to try to meet normality.This is done because the "Maximum Likelihood estimator" (ML) requires multivariate normality for calculations. It is the most common estimator in SEM analyses but there are others as well. Maria also agreed that a normalization is needed on this case.
 db%>%dplyr::mutate(tot_water_sup=predict(bestNormalize::orderNorm(tot_water_sup)),
-                    tot_water_regulation=predict(bestNormalize::orderNorm(tot_water_regulation)),
-                      tot_supl_cseq=predict(bestNormalize::orderNorm(tot_supl_cseq)),           
-                       tot_supl_cstor=predict(bestNormalize::orderNorm(tot_supl_cstor)),
-                       tot_supl_erosion=predict(bestNormalize::boxcox(tot_supl_erosion)),
-                       tot_supl_timber=predict(bestNormalize::boxcox(tot_supl_timber)),
-                        tot_supl_recreation=predict(bestNormalize::boxcox(tot_supl_recreation)),
-                        #human agency
-                         indig_censoP=predict (bestNormalize::orderNorm(indig_censoP)),   
-                          educa=predict (bestNormalize::arcsinh_x(educa)), 
-                           indiv=predict(bestNormalize::orderNorm(indiv)),
-                            jurid=predict(bestNormalize::yeojohnson(jurid)),
-                             #Land endowment 
-                             area=predict(bestNormalize::orderNorm(area)),
-                          #income
-                          inc=predict (bestNormalize::boxcox(inc))
-                          
+                   tot_water_regulation=predict(bestNormalize::orderNorm(tot_water_regulation)),
+                   tot_supl_cseq=predict(bestNormalize::orderNorm(tot_supl_cseq)),           
+                   tot_supl_cstor=predict(bestNormalize::orderNorm(tot_supl_cstor)),
+                   tot_supl_erosion=predict(bestNormalize::boxcox(tot_supl_erosion)),
+                   tot_supl_timber=predict(bestNormalize::boxcox(tot_supl_timber)),
+                   tot_supl_recreation=predict(bestNormalize::boxcox(tot_supl_recreation)),
+                   #human agency
+                   indig_censoP=predict (bestNormalize::orderNorm(indig_censoP)),   
+                   educa=predict (bestNormalize::arcsinh_x(educa)), 
+                   indiv=predict(bestNormalize::orderNorm(indiv)),
+                   jurid=predict(bestNormalize::yeojohnson(jurid)),
+                   #Land endowment 
+                   area=predict(bestNormalize::orderNorm(area)),
+                   #income
+                   inc=predict (bestNormalize::boxcox(inc))
+                   
 )->dbn#new data base with normalized variables is "dbn"
 
 data.table(colnames(dbn))
@@ -139,19 +143,16 @@ par(mfrow= c (5,7),mar=c(1,2,2,0.5))
 for (i in 1:13) {
   hist(dbn[,c(1:13)][,i],main=names(dbn [,c(1:13)])[i],xlab=names(dbn [,c(1:13)])[i])
 }
- 
+
 
 #to check variable order again
 data.table(colnames(dbn))
 
-####Model 1: Regression model with "income" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models depending on the ES category. prov= provisioning services; reg=regulating services; cult:cultural services####
-
-
-####model 1 (total)####
+####model group 1: Regression model with "income" as the outcome variable. As we're using ES categories (provisioning, regulating and cultural) we will name the models depending on the ES category. prov= provisioning services; reg=regulating services; cult:cultural services####
 
 #Step 1: Model specification
 
-model1_total_prov<-'#Structural model using raw indicators - ES yield (provisioning ES)
+model1_total_prov<-'#Structural model
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_prov=~tot_water_sup+tot_supl_timber
@@ -163,41 +164,36 @@ model1_total_prov<-'#Structural model using raw indicators - ES yield (provision
          tot_prov~ha+area
          area~ha
         
-        #New parameter (possible new indirect parameter if there are some)
-           #g_sup:=ha*area#indirect effect
 
          #Covariance structure(of latent variables)
 #Covariance structure(of latent variables)
-         tot_supl_timber~~0*tot_supl_timber#avoid variance of rurality to become negative. It is possible that the model fits the data well but that the true value of the residual variance is very close to zero. If this happens then the estimate can become negative because of sampling fluctuations. Ifyou think that this is the case then you force lavaan to maintain non-negative variance estimates by specifying a non-linear constraint on this residual variance
-         
-         
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)     
+         tot_supl_timber~~0*tot_supl_timber#avoid variance of rurality to become negative. It is possible that the model fits the data well but that the true value of the residual variance is very close to zero. If this happens then the estimate can become negative because of sampling fluctuations. If you think that this is the case then you force lavaan to maintain non-negative variance estimates by specifying a non-linear constraint on this residual variance
 '
 
 #Step 2: Model estimation
-model1_total_prov_fit<-sem(model1_total_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+model1_total_prov_fit<-sem(model1_total_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)
 
 #Step 3: Evaluate the model
 summary(model1_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+uno_a_total_prov<-fitMeasures(model1_total_prov_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))#typical goodness-of-fit indicators
 std_prov1<-standardizedSolution(model1_total_prov_fit)#standardized values for latent variables, regressions and covariances
-#varianace of cstor negative, fix it to 0
 
 #Residuals
-resid(model1_total_prov_fit)
+resid(model1_total_prov_fit)#chequing residuals
 
 #Model-implied covariance matrix
 fitted(model1_total_prov_fit)
 parameterEstimates(model1_total_prov_fit, ci=FALSE, rsquare=TRUE, standardized=TRUE)#gives the currently used parameters of the model fit
 
-#Step 4: VIsualize the path model
+#Step 4: Visualize the path model
 semPlot::semPaths(model1_total_prov_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
 
 #Modification of indices
 modindices(model1_total_prov_fit, sort.=TRUE,minimum.value = 10)
 
+
 ##model1_total_reg##
-model1_total_reg<-'#Structural model using raw indicators - ES yield (provisioning ES)
+model1_total_reg<-'#Structural model
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
@@ -211,15 +207,14 @@ model1_total_reg<-'#Structural model using raw indicators - ES yield (provisioni
          #Covariance structure(of latent variables)
           tot_supl_cstor~~0*tot_supl_cstor#avoid variance of rurality to become negative.
          
-         
   '
 
 #Step 2: Model estimation
-model1_total_reg_fit<-sem(model1_total_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+model1_total_reg_fit<-sem(model1_total_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#
 
 #Step 3: Evaluate the model
 summary(model1_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+uno_a_total_reg<-fitMeasures(model1_total_reg_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))#typical goodness-of-fit indicators
 std_reg1<-standardizedSolution(model1_total_reg_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
@@ -229,15 +224,16 @@ resid(model1_total_reg_fit)
 fitted(model1_total_reg_fit)
 parameterEstimates(model1_total_reg_fit)#gives the currently used parameters of the model fit
 
-#Step 4: VIsualize the path model
+#Step 4: Visualize the path model
 semPlot::semPaths(model1_total_reg_fit, rotation=2, layout="tree2",intercepts=FALSE, what="std",whatLabels="std",posCol="black", edge.width=0.5, style="Lisrel", fade=FALSE, edge.label.position=0.55, curve = 1.75)
 
 #Modification of indices
 modindices(model1_total_reg_fit, sort.=TRUE,minimum.value = 10)
-#recommended modification indiv~~jurid
 
-##model1_total_cult##THIS MODEL REQUIRES SPECIAL ATTENTION!
-model1_total_cult<-'#Structural model using raw indicators - ES yield (cultural ES)
+
+
+##model1_total_cult##
+model1_total_cult<-'structural model
         
          #Measurement models/defining latent variables,variables that cannot be directly measured. there is no latent variable for the recreation ES as it is only one variable. Only human agency(ha) is defined here as latent variable
          #!this model does not run with just one Latent Variable, which would be in this case human agency, we have only one ES, hence we cant build a secont latent variable. Instead we just use all variables as measurement variables. But maybe rachel you have a better solution? I actually havent found anything saying that it is not possible to use just one latent variable, but as the model does not run I assuming thats the case. The results are as you might see weird (fit indices are perfect)
@@ -248,19 +244,14 @@ model1_total_cult<-'#Structural model using raw indicators - ES yield (cultural 
          inc~educa+indig_censoP+indiv+jurid+tot_supl_recreation+area
           tot_supl_recreation~educa+indig_censoP+indiv+jurid+area
           area~educa+indig_censoP+indiv+jurid
-
-         #Covariance structure(of latent variables) 
-         #indiv~~jurid
-      
-         #Residual covariance (this is for measurement variables for which we think covariance or variance should be gini_incomeluded in the model)
         
 '
 #Step 2: Model estimation
-model1_total_cult_fit<-sem(model1_total_cult, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+model1_total_cult_fit<-sem(model1_total_cult, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)
 
 #Step 3: Evaluate the model
 summary(model1_total_cult_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
-uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))
+uno_a_total_cult<-fitMeasures(model1_total_cult_fit, c("cfi","tli", "pnfi","chisq","df","rmsea","srmr", "pvalue"))#typical goodness-of-fit indicators
 std_cult1<-standardizedSolution(model1_total_cult_fit)#standardized values for latent variables, regressions and covariances
 
 #Residuals
@@ -277,20 +268,21 @@ semPlot::semPaths(model1_total_cult_fit, rotation=2, layout="tree2",intercepts=F
 modindices(model1_total_cult_fit, sort.=TRUE,minimum.value = 10)
 
 
-
-####results model 1####
+####results model group 1####IMPORTANT: change to your respective folders
 
 #goodness-of-fit
 model1_total<-cbind(uno_a_total_prov,uno_a_total_reg,uno_a_total_cult)
 colnames(model1_total)<-c("provisioning","regulating","cultural")
 model1_total<-format(round(model1_total,3),nsmall = 3)
 model1_total<-as.data.frame(model1_total)
-write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)#change this to your respective folders. This line is when using non-normalized data
+write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)
+
 #another way of extracting
 fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/fit_indicators", fitmeas = c("chisq", "df", "pvalue", "rmsea",
-                                                                                                                                    "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
+                                                                                                                                    "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")#change to your respective folders
 
-#explanatory power of models# this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
+#explanatory power of models# 
+
 #with standardizedsolution function
 std_total1<-rbind(std_prov1,std_reg1,std_cult1)
 write.xlsx(std_total1, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
@@ -298,21 +290,16 @@ write.xlsx(std_total1, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_tota
 #with semTable
 list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit)#,model1_total_cult_fit)#original model fits
 
-sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model1", paramSets="all",type="html")#change location to see table
-
-
-
-#####Model 2: Regression model with "ES supply inequality" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural service.####
+sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model1", paramSets="all",type="html")
 
 
 
 
-
-####model 2 (total)####
+#####Model group 2: Regression model with "ES supply inequality" as the outcome variable. As we're using services categories (provisioning, regulating and cultural) we will name the models after the use of yield (a) or total ES values (b) and depending on the Es category. prov= provisioning services; reg=regulating services; cult:cultural service.####
 
 #Step 1: Model specification
 
-model2_total_prov<-'#Structural model using raw indicators - total ES supply (provisioning ES)
+model2_total_prov<-'#Structural model
         
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_prov=~tot_water_sup+tot_supl_timber
@@ -329,13 +316,12 @@ model2_total_prov<-'#Structural model using raw indicators - total ES supply (pr
 '
 
 #Step 2: Model estimation
-model2_total_prov_fit<-sem(model2_total_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+model2_total_prov_fit<-sem(model2_total_prov, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#
 
 #Step 3: Evaluate the model
 summary(model2_total_prov_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)
 dos_a_total_prov<-fitMeasures(model2_total_prov_fit, c("cfi","chisq","rmsea","srmr", "pvalue","ifi","tli", "nfi"))
 std_prov2<-standardizedSolution(model2_total_prov_fit)#standardized values for latent variables, regressions and covariances
-inspect(model2_total_prov_fit,what="std")$lambda
 
 #Residuals
 resid(model2_total_prov_fit)
@@ -353,7 +339,6 @@ modindices(model2_total_prov_fit, sort.=TRUE,minimum.value = 10)
 
 ##model2_total_reg##
 model2_total_reg<-'#Structural model using raw indicators - total ES supply (provisioning ES)
-        
          #Measurement models/defining latent variables,variables that cannot be directly measured
           tot_reg=~tot_water_regulation+tot_supl_cseq+tot_supl_cstor+tot_supl_erosion
           ha=~+educa+indig_censoP+indiv+jurid
@@ -369,7 +354,7 @@ model2_total_reg<-'#Structural model using raw indicators - total ES supply (pro
         '
 
 #Step 2: Model estimation
-model2_total_reg_fit<-sem(model2_total_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)#auto.cov.y=TRUE, orthogonal=TRUE
+model2_total_reg_fit<-sem(model2_total_reg, data=dbn, meanstructure=FALSE, estimator="ML", check.gradient=FALSE)
 
 #Step 3: Evaluate the model
 summary(model2_total_reg_fit, rsquare=TRUE, fit.measures=TRUE,standardized=TRUE)

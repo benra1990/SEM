@@ -1,4 +1,4 @@
-##Benra et al 2022 - Human agency and land endowment are determining factors in the ecosystem services supply - wellbeing nexus##
+##Benra et al 2022 - Mismatches in the ecosystem services-wellbeing nexus in southern Chile##
 
 
 ##Libraries##

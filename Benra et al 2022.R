@@ -19,7 +19,7 @@
 ##
 
 
-##Libraries##
+##Load up packages:
 
 library(lavaan)
 library(semPlot)
@@ -50,14 +50,14 @@ income<-db_short[c("weighted_mean_income")]##mean income & gini income (data chi
 area<-db_short[c("area_promedio_predios")]##mean area  of all the properties within a municipality
 
 
-###db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# this will change depending on where you have it on your computers!###aqui link to db
-
+#arrange db and assign names to columns
 db<-data.frame(ha,income,area, tot_sup)#
 data.table(colnames(db))#check order of columns
 colnames(db)[c(1:6)]<-c("indiv","jurid", "indig_censoP","educa","inc", "area")
 data.table(colnames(db))
 
-sapply(db, function(x) sum(is.na(x)))#looking at NA in each column
+#looking at NA in each column
+sapply(db, function(x) sum(is.na(x)))
 
 #Check the data and transform when needed (scale and normalize)
 
@@ -85,10 +85,11 @@ cor_datos<-round(cor(db[c("indiv","jurid","indig_censoP","educa","inc","area","t
 
 str(cor_datos)
 
-write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##save correlation matrix
+#write.csv(cor_datos, "H:/SIG/Procesos SIG/Spatial distribution/Tables/correlaciones1.csv")##save correlation matrix
 
 
-##alternative calculation with HMSIC package##
+##alternative calculation of correlations with HMSIC package
+
 cor_matrix<-rcorr(as.matrix(db_cor))#corrr package produces r & P values
 
 
@@ -103,13 +104,13 @@ flattenCorrMatrix <- function(cormat, pmat) {
 }
 matriz_plana<-flattenCorrMatrix(cor_matrix$r, cor_matrix$P)##visualizing matriz plana
 
-
+#plot correlations matrix
 corrplot(cor_matrix$r,  type="lower", method = "square", order="original", pch.cex = 0.8, pch.col="black",
          p.mat = cor_matrix$P, tl.col="black", sig.level = c(0.001, 0.01, 0.05), insig = "label_sig", diag=FALSE)#here you use above calculated r y P values
 
 
 
-#check which normalization technique is the best for each variable. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
+#check which normalization technique is the best for each variable with bestNorlamize package. Note here that there are some variables that look kind of normal so they would not need a transformation. But here I calculated the best theoretical normalization method for all of them to be applied case by case.
 
 #total supply
 bestNormalize(db$tot_water_sup)
@@ -119,14 +120,12 @@ bestNormalize(db$tot_supl_cstor)
 bestNormalize(db$tot_supl_erosion)
 bestNormalize(db$tot_supl_timber)
 bestNormalize(db$tot_supl_recreation)
-
 #human agency
 bestNormalize(db$indig_censoP)
 bestNormalize(db$educa)
 bestNormalize(db$indiv)
 bestNormalize(db$jurid)
-
-#Land endowment
+#Land area
 bestNormalize(db$area)
 #income
 bestNormalize(db$inc)
@@ -161,7 +160,6 @@ par(mfrow= c (5,7),mar=c(1,2,2,0.5))
 for (i in 1:13) {
   hist(dbn[,c(1:13)][,i],main=names(dbn [,c(1:13)])[i],xlab=names(dbn [,c(1:13)])[i])
 }
-
 
 #to check variable order again
 data.table(colnames(dbn))
@@ -287,30 +285,19 @@ modindices(model1_total_cult_fit, sort.=TRUE,minimum.value = 10)
 
 
 ####results model group 1####
-####IMPORTANT: change to your respective folders
+####IMPORTANT: change to your respective folders for saving
 
-#goodness-of-fit
+#goodness-of-fit of models
 model1_total<-cbind(uno_a_total_prov,uno_a_total_reg,uno_a_total_cult)
 colnames(model1_total)<-c("provisioning","regulating","cultural")
 model1_total<-format(round(model1_total,3),nsmall = 3)
 model1_total<-as.data.frame(model1_total)
-write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)
+#write.xlsx(model1_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model1_total.xlsx", row.names=TRUE, overwrite=TRUE)
 
-#another way of extracting
-fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/fit_indicators", fitmeas = c("chisq", "df", "pvalue", "rmsea",
-                                                                                                                                    "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")#change to your respective folders
 
-#explanatory power of models# 
-
-#with standardizedsolution function
+#explanatory power of models
 std_total1<-rbind(std_prov1,std_reg1,std_cult1)
-write.xlsx(std_total1, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
-
-#with semTable
-list_model1_total<-list(model1_total_prov_fit,model1_total_reg_fit)#,model1_total_cult_fit)#original model fits
-
-sem_tabla<-semTable(list_model1_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model1", paramSets="all",type="html")
-
+#write.xlsx(std_total1, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total1.xlsx", row.names=TRUE, overwrite=TRUE)
 
 
 
@@ -397,7 +384,6 @@ semPlot::semPaths(model2_total_reg_fit, rotation=2, layout="tree2",intercepts=FA
 modindices(model2_total_reg_fit, sort.=TRUE,minimum.value = 10)
 
 
-
 ##model2_total_cult## CHECK COMMENT OF THE OTHER CULTURAL MODEL; IN THIS CASE THE SAME APPLIES NO LATENT VARIABLES9
 model2_total_cult<-'#Structural model using raw indicators - ES yield (provisioning ES)
         
@@ -444,23 +430,12 @@ model2_total<-cbind(dos_a_total_prov,dos_a_total_reg,dos_a_total_cult)
 colnames(model2_total)<c("provisioning","regulating", "cultural")
 model2_total<-format(round(model2_total,3),nsmall = 3)
 model2_total<-as.data.frame(model2_total)
-write.xlsx(model2_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_total.xlsx", row.names=TRUE, overwrite=TRUE)
+#write.xlsx(model2_total, "H:/SIG/Procesos SIG/Spatial distribution/Tables/model2_total.xlsx", row.names=TRUE, overwrite=TRUE)
 
-#another way of extracting
-fit_indicators<-compareLavaan(list_model1_yield,file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/fit_indicators", fitmeas = c("chisq", "df", "pvalue", "rmsea",
-                                                                                                                                    "cfi", "tli", "srmr", "aic", "bic"),chidif = FALSE, type="html")
-
-
-#explanatory power of models# 
-#this will be a longer table and probably will go to the appendix but some results are key in my opinion to compara "both directions", as as you will see with model 2 the goodness-of.fit indicators are equal but the estimates, standard errors and so on are quote different among variables.
-#with standardizedsolution function
+#explanatory power of models
 std_total2<-rbind(std_prov2,std_reg2,std_cult2 )
-write.xlsx(std_total2, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total2.xlsx", row.names=TRUE, overwrite=TRUE)
+#write.xlsx(std_total2, "H:/SIG/Procesos SIG/Spatial distribution/Tables/std_total2.xlsx", row.names=TRUE, overwrite=TRUE)
 
-#with semTable
-list_model2_total<-list(model2_total_prov_fit,model2_total_reg_fit)#,model2_total_cult_fit)#original model fits
-
-sem_tabla<-semTable(list_model2_total, file= "H:/SIG/Procesos SIG/Spatial distribution/Tables/sem_tabla_model2", paramSets="all",type="html")#change location to see table
 
 #END#
 

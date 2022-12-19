@@ -1,4 +1,22 @@
-##Benra et al 2022 - Mismatches in the ecosystem services-wellbeing nexus in southern Chile##
+##--------------
+##
+##Script name: Mismatches in the ecosystem services-wellbeing nexus in chilean Patagonia
+##
+##Purpose of script: To calculate structural equation models for three ecosystem services categories in two model groups representing ES supply-wellbeing connections, where model group 1 has ES supply as explanatory variable of wellbeing (income) and model group 2 considers the opposite. 
+##
+##Author: Felipe Benra
+##
+##Copyright (c) Felipe Benra, 2022
+##
+##--------------
+##
+##Notes:Input data is made available: 
+##
+##Scrips is provided to develop the practical process.
+##
+##Description of the input data required to replicate these analyses can be found at Benra et al. 2023. doi TBC
+##
+##
 
 
 ##Libraries##
@@ -19,7 +37,7 @@ library(xtable)
 
 
 #Import database
-db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# this will change depending on where you have it on your computers!
+db_short<-read.xlsx("H:/SIG/Procesos SIG/BD_inequity/base de datos/db_short.xlsx")# change this depending on where you want it on your computers!
 str(db_short)#check structure
 data.table(colnames(db_short))#get order of columns in the dataframe
 
